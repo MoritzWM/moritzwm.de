@@ -1,0 +1,19 @@
+languageCode = "en-us"
+title = "Moritz Wachsmuth-Melm"
+
+[menu]
+  [[menu.main]]
+    identifier = "impressum"
+    name = "impressum"
+    url = "/impressum/"
+    weight = 99
+  [[menu.main]]
+    identifier = "about"
+    name = "about me"
+    url = "/about/"
+    weight = 1
+
+pygmentsUseClasses = true
+pygmentsUseFences = true
+[params]
+  highlight = true

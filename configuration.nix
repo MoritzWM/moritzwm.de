@@ -3,10 +3,7 @@
   imports =
     [
       ./hardware-configuration.nix
-      ./user-moritz.nix
-      ./nextcloud.nix
-      ./fail2ban.nix
-      ./vaultwarden.nix
+      ./user-tristan.nix
     ];
 
   # Use the GRUB 2 boot loader.
@@ -14,7 +11,7 @@
   boot.loader.grub.version = 2;
   boot.loader.grub.device = "/dev/sda";
 
-  networking.hostName = "v2202205176338190863";
+  networking.hostName = "v2202302194336219745";
   networking.domain = "megasrv.de";
   networking.useDHCP = false;
   networking.interfaces.ens3.useDHCP = true;

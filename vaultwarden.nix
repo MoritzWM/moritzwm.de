@@ -8,6 +8,7 @@
       webVaultFolder = "${pkgs.vaultwarden-vault}/share/vaultwarden/vault";
       WEB_VAULT_ENABLED = true;
       WEBSOCKET_ENABLED = true;
+      SIGNUPS_ALLOWED = false;
       SIGNUPS_VERIFY = true;
       DOMAIN = "https://vault.twiessalla.de";
       DISABLE_ADMIN_TOKEN = false;

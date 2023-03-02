@@ -1,4 +1,2 @@
-# NixOS configuration files for my server
-
-I'm running Nextcloud and Vaultwarden on a server hosted by [netcup](https://www.netcup.eu/).
-These are the config files.
+# moritzwm.de
+Configuration files for my website, forked from [MoritzWM/moritzwm.de](https://github.com/MoritzWM/moritzwm.de).

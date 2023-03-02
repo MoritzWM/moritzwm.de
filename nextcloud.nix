@@ -1,14 +1,14 @@
 { config, pkgs, ... }:
 {
   security.acme.acceptTerms = true;
-  security.acme.defaults.email = "mail@moritzwm.de";
+  security.acme.defaults.email = "tristan.wiessalla@posteo.de";
   services.nginx = {
     enable = true;
     virtualHosts = {
       "cloud.${config.networking.fqdn}" = {
         forceSSL = true;
         enableACME = true;
-        serverAliases = [ "cloud.moritzwm.de" ];
+        serverAliases = [ "cloud.twiessalla.de" ];
         locations."/" = {
           root = "/var/lib/nextcloud/";
         };
@@ -32,9 +32,9 @@
       dbuser = "nextcloud";
       dbhost = "/run/postgresql"; 
       dbname = "nextcloud";
-      adminpassFile = "/etc/nixos/nextcloud_pass.secret";
-      adminuser = "moritz_admin";
-      extraTrustedDomains = [ "cloud.moritzwm.de" ];
+      adminpassFile = "/var/nextcloud_pass.secret";
+      adminuser = "tristan_admin";
+      extraTrustedDomains = [ "cloud.twiessalla.de" ];
       defaultPhoneRegion = "DE";
       overwriteProtocol = "https";
     };
@@ -90,7 +90,7 @@
     nfs-utils
   ];
   fileSystems."${config.services.nextcloud.datadir}/data" = {
-    device = "46.38.248.211:/voln481806a1";
+    device = "46.38.248.211:/voln543494a1";
     fsType = "nfs";
     options = [
       "auto"

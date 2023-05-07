@@ -2,6 +2,7 @@
 {
   security.acme.acceptTerms = true;
   security.acme.defaults.email = "mail@moritzwm.de";
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
   services.nginx = {
     enable = true;
     virtualHosts = {
@@ -97,5 +98,16 @@
     ];
   };
 
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  # Allow pg_dump for passwordless backup
+  security.sudo = {
+    enable = true;
+    extraRules = [{
+      commands = [{
+	command = "${pkgs.postgresql_13}/bin/pg_dump";
+	options = [ "NOPASSWD" ];
+      }];
+      runAs = "nextcloud";
+      groups = [ "wheel" ];
+    }];
+  };
 }

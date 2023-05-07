@@ -7,10 +7,10 @@
       webVaultFolder = "${pkgs.vaultwarden-vault}/share/vaultwarden/vault";
       WEB_VAULT_ENABLED = true;
       WEBSOCKET_ENABLED = false;
-      LOG_FILE = "/var/log/vaultwarden";
+      LOG_FILE = "/var/log/vaultwarden.log";
       LOG_LEVEL = "Info";
       SIGNUPS_ALLOWED = false;
-      DISABLE_ADMIN_TOKEN = false;
+      DISABLE_ADMIN_TOKEN = true;
       SHOW_PASSWORD_HINT = false;
       DOMAIN = "https://warden.moritzwm.de";
     };

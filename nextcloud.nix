@@ -106,7 +106,7 @@
 	command = "${pkgs.postgresql_13}/bin/pg_dump";
 	options = [ "NOPASSWD" ];
       }{
-        command = "${pkgs.nextcloud26}/bin/nextcloud-occ";
+        command = "/run/current-system/sw/bin/nextcloud-occ";
 	options = [ "NOPASSWD" ];
       }{
         command = "${pkgs.rsync}/bin/rsync";

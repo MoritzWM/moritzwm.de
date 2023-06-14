@@ -7,6 +7,7 @@
       ./nextcloud.nix
       ./fail2ban.nix
       ./vaultwarden.nix
+      ./tor.nix
     ];
 
   # Use the GRUB 2 boot loader.

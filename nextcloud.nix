@@ -26,7 +26,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "cloud.${config.networking.fqdn}";
-    package = pkgs.nextcloud26;
+    package = pkgs.nextcloud27;
     enableBrokenCiphersForSSE = false;
     config = {
       dbtype = "pgsql";

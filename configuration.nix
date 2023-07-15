@@ -35,7 +35,6 @@
   };
   programs.git.enable = true;
   services.openssh.enable = true;
-  services.snowflake-proxy.enable = true;
   system.stateVersion = "22.11";
   nix.settings.auto-optimise-store = true;
   nix.gc = {

@@ -8,6 +8,7 @@
       ./fail2ban.nix
       ./vaultwarden.nix
       ./tor.nix
+      ./paperless.nix
     ];
 
   # Use the GRUB 2 boot loader.
@@ -25,7 +26,7 @@
 
   environment.systemPackages = with pkgs; [
     tmux
-    htop
+    bottom
   ];
   programs.neovim = {
     enable = true;
@@ -35,7 +36,7 @@
   };
   programs.git.enable = true;
   services.openssh.enable = true;
-  system.stateVersion = "22.11";
+  system.stateVersion = "23.05";
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;

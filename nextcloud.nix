@@ -4,6 +4,7 @@
   security.acme.defaults.email = "mail@moritzwm.de";
   networking.firewall.allowedTCPPorts = [ 80 443 ];
   services.nginx = {
+  serverNamesHashBucketSize = 64;
     enable = true;
     virtualHosts = {
       "cloud.${config.networking.fqdn}" = {
@@ -28,6 +29,8 @@
     hostName = "cloud.${config.networking.fqdn}";
     package = pkgs.nextcloud27;
     enableBrokenCiphersForSSE = false;
+    nginx.recommendedHttpHeaders = true;
+    nginx.hstsMaxAge = 15552000;
     config = {
       dbtype = "pgsql";
       dbuser = "nextcloud";
@@ -81,6 +84,8 @@
     };
     timerConfig = {
       OnCalendar = "*-*-* 2:00:00";
+      OnBootSec = "10min";
+      OnUnitActiveSec = "10min";
       Persistent = true;
     };
     wantedBy = [ "timers.target" ];

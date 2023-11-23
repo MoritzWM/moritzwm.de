@@ -7,8 +7,6 @@
       webVaultFolder = "${pkgs.vaultwarden-vault}/share/vaultwarden/vault";
       WEB_VAULT_ENABLED = true;
       WEBSOCKET_ENABLED = false;
-      LOG_FILE = "/var/log/vaultwarden.log";
-      LOG_LEVEL = "Info";
       SIGNUPS_ALLOWED = false;
       DISABLE_ADMIN_TOKEN = true;
       SHOW_PASSWORD_HINT = false;
@@ -17,6 +15,9 @@
     environmentFile = ./vaultwarden.secret;
   };
 
+
+  security.acme.acceptTerms = true;
+  security.acme.defaults.email = "mail@moritzwm.de";
   security.acme.certs = {
     "warden.moritzwm.de" = {
       group = "nginx";
@@ -25,6 +26,7 @@
   };
 
   services.nginx = {
+    serverNamesHashBucketSize = 64;
     recommendedGzipSettings = true;
     recommendedOptimisation = true;
     recommendedProxySettings = true;

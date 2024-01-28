@@ -59,4 +59,13 @@
       }
     ];
   };
+  # Not working yet
+  # services.fail2ban.jails.vaultwarden = ''
+    # enabled = true
+    # port = 80,443,8081
+    # banaction = %(banaction_allports)s
+    # backend = systemd
+    # filter = vaultwarden[journalmatch='_SYSTEMD_UNIT=vaultwarden.service']
+    # maxretry = 3
+  # '';
 }

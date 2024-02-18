@@ -28,7 +28,6 @@
     enable = true;
     hostName = "cloud.${config.networking.fqdn}";
     package = pkgs.nextcloud27;
-    enableBrokenCiphersForSSE = false;
     nginx.recommendedHttpHeaders = true;
     nginx.hstsMaxAge = 15552000;
     config = {
@@ -52,11 +51,10 @@
     enable = true;
     package = pkgs.postgresql_15;
     ensureDatabases = [ "nextcloud" ];
-    ensureUsers = [
-     { name = "nextcloud";
-       ensurePermissions."DATABASE nextcloud" = "ALL PRIVILEGES";
-     }
-    ];
+    ensureUsers = [{
+      name = "nextcloud";
+      ensureDBOwnership = true;
+    }];
   };
 
   # ensure that postgres is running *before* running the setup

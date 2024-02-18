@@ -36,7 +36,7 @@
   };
   programs.git.enable = true;
   services.openssh.enable = true;
-  system.stateVersion = "23.05";
+  system.stateVersion = "23.11";
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;
@@ -44,5 +44,8 @@
     options = "--delete-older-than 30d";
   };
   zramSwap.enable = true;
+  system.autoUpgrade.enable = true;
+  system.autoUpgrade.allowReboot = true;
+
 }
 

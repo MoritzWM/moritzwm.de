@@ -53,11 +53,10 @@
   };
   services.postgresql = {
     ensureDatabases = [ "vaultwarden" ];
-    ensureUsers = [
-      { name = "vaultwarden";
-        ensurePermissions."DATABASE vaultwarden" = "ALL PRIVILEGES";
-      }
-    ];
+    ensureUsers = [{
+      name = "vaultwarden";
+      ensureDBOwnership = true;
+    }];
   };
   # Not working yet
   # services.fail2ban.jails.vaultwarden = ''

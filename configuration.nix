@@ -9,6 +9,7 @@
       ./vaultwarden.nix
       ./tor.nix
       ./paperless.nix
+      ./pgsql_upgrade.nix
     ];
 
   # Use the GRUB 2 boot loader.

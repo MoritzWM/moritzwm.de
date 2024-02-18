@@ -50,7 +50,7 @@
 
   services.postgresql = {
     enable = true;
-    package = pkgs.postgresql_13;
+    package = pkgs.postgresql_15;
     ensureDatabases = [ "nextcloud" ];
     ensureUsers = [
      { name = "nextcloud";
@@ -108,7 +108,7 @@
     enable = true;
     extraRules = [{
       commands = [{
-	command = "${pkgs.postgresql_13}/bin/pg_dump";
+	command = "${pkgs.postgresql}/bin/pg_dump";
 	options = [ "NOPASSWD" ];
       }{
         command = "/run/current-system/sw/bin/nextcloud-occ";

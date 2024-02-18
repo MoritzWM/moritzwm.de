@@ -9,6 +9,7 @@
   services.nginx = {
     enable = true;
     recommendedProxySettings = true;
+    clientMaxBodySize = "25m";
     virtualHosts = {
       "paperless.${config.networking.fqdn}" = {
         forceSSL = true;

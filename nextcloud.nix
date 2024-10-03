@@ -27,7 +27,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "cloud.${config.networking.fqdn}";
-    package = pkgs.nextcloud27;
+    package = pkgs.nextcloud28;
     nginx.recommendedHttpHeaders = true;
     nginx.hstsMaxAge = 15552000;
     config = {

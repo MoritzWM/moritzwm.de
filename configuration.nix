@@ -44,8 +44,8 @@
     options = "--delete-older-than 30d";
   };
   zramSwap.enable = true;
-  system.autoUpgrade.enable = true;
-  system.autoUpgrade.allowReboot = true;
+  # system.autoUpgrade.enable = true;
+  # system.autoUpgrade.allowReboot = true;
 
 }
 

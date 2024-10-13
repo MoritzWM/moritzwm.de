@@ -36,7 +36,7 @@
   };
   programs.git.enable = true;
   services.openssh.enable = true;
-  system.stateVersion = "23.11";
+  system.stateVersion = "24.05";
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;

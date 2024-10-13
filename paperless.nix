@@ -4,7 +4,9 @@
     enable = true;
     port = 58080;
     passwordFile = "/etc/nixos/paperless_pass.secret";
-    extraConfig.PAPERLESS_OCR_LANGUAGE = "deu";
+    settings = {
+	PAPERLESS_OCR_LANGUAGE = "deu";
+    };
   };
   services.nginx = {
     enable = true;

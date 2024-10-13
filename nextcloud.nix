@@ -27,9 +27,20 @@
   services.nextcloud = {
     enable = true;
     hostName = "cloud.${config.networking.fqdn}";
-    package = pkgs.nextcloud28;
+    package = pkgs.nextcloud29;
     nginx.recommendedHttpHeaders = true;
     nginx.hstsMaxAge = 15552000;
+    phpOptions = {
+      "opcache.interned_strings_buffer" = 32;
+    };
+    settings = {
+      default_phone_region = "DE";
+      overwriteprotocol = "https";
+      trusted_domains = [ "cloud.moritzwm.de" ];
+      preview_max_memory = 4096;
+      preview_max_filesize_image = 256;
+      log_type = "file";
+    };
     config = {
       dbtype = "pgsql";
       dbuser = "nextcloud";
@@ -37,13 +48,6 @@
       dbname = "nextcloud";
       adminpassFile = "/etc/nixos/nextcloud_pass.secret";
       adminuser = "moritz_admin";
-      extraTrustedDomains = [ "cloud.moritzwm.de" ];
-      defaultPhoneRegion = "DE";
-      overwriteProtocol = "https";
-    };
-    extraOptions = {
-      preview_max_memory = 4096;
-      preview_max_filesize_image = 256;
     };
   };
 

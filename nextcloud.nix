@@ -27,7 +27,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "cloud.${config.networking.fqdn}";
-    package = pkgs.nextcloud29;
+    package = pkgs.nextcloud30;
     nginx.recommendedHttpHeaders = true;
     nginx.hstsMaxAge = 15552000;
     phpOptions = {
@@ -74,7 +74,7 @@
     serviceConfig = {
       Type = "oneshot";
       User = "nextcloud";
-      ExecStart = "/run/current-system/sw/bin/nextcloud-occ preview:pre-generate";
+      ExecStart = "/run/current-system/sw/bin/nextcloud-occ preview:generate";
     };
     wantedBy = [ "basic.target" ];
   };

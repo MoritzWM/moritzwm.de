@@ -6,6 +6,7 @@
     passwordFile = "/etc/nixos/paperless_pass.secret";
     settings = {
 	PAPERLESS_OCR_LANGUAGE = "deu";
+	PAPERLESS_URL = "https://paperless.moritzwm.de";
     };
   };
   services.nginx = {

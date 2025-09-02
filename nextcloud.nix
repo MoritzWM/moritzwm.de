@@ -27,7 +27,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "cloud.${config.networking.fqdn}";
-    package = pkgs.nextcloud30;
+    package = pkgs.nextcloud31;
     nginx.recommendedHttpHeaders = true;
     nginx.hstsMaxAge = 15552000;
     phpOptions = {
@@ -69,29 +69,29 @@
 
   # Nextcloud preview generator
   # https://apps.nextcloud.com/apps/previewgenerator
-  systemd.services."nextcloud-generate-preview" = {
-    description = "Nextcloud Preview Generator";
-    serviceConfig = {
-      Type = "oneshot";
-      User = "nextcloud";
-      ExecStart = "/run/current-system/sw/bin/nextcloud-occ preview:generate";
-    };
-    wantedBy = [ "basic.target" ];
-  };
+  # systemd.services."nextcloud-generate-preview" = {
+    # description = "Nextcloud Preview Generator";
+    # serviceConfig = {
+      # Type = "oneshot";
+      # User = "nextcloud";
+      # ExecStart = "/run/current-system/sw/bin/nextcloud-occ preview:generate";
+    # };
+    # wantedBy = [ "basic.target" ];
+  # };
 
-  systemd.timers."nextcloud-generate-preview" = {
-    enable = true;
-    unitConfig = {
-      Description = "Run Nextcloud Preview Generator daily at 02:00";
-    };
-    timerConfig = {
-      OnCalendar = "*-*-* 2:00:00";
-      OnBootSec = "10min";
-      OnUnitActiveSec = "10min";
-      Persistent = true;
-    };
-    wantedBy = [ "timers.target" ];
-  };
+  # systemd.timers."nextcloud-generate-preview" = {
+    # enable = true;
+    # unitConfig = {
+      # Description = "Run Nextcloud Preview Generator daily at 02:00";
+    # };
+    # timerConfig = {
+      # OnCalendar = "*-*-* 2:00:00";
+      # OnBootSec = "10min";
+      # OnUnitActiveSec = "10min";
+      # Persistent = true;
+    # };
+    # wantedBy = [ "timers.target" ];
+  # };
 
   # Mount the data dir (it's an NFS share)
   environment.systemPackages = with pkgs; [

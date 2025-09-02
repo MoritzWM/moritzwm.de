@@ -7,7 +7,7 @@
       ./nextcloud.nix
       ./fail2ban.nix
       ./vaultwarden.nix
-      ./tor.nix
+      # ./tor.nix
       ./paperless.nix
       ./pgsql_upgrade.nix
     ];
@@ -36,7 +36,7 @@
   };
   programs.git.enable = true;
   services.openssh.enable = true;
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.05";
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;

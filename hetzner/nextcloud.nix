@@ -3,26 +3,48 @@
   environment.etc."traefik/dynamic/nextcloud.yml".text = ''
     http:
       routers:
-        nextcloud:
+        nextcloud-http:
           rule: "Host(`hetzner.moritzwm.de`)"
+          service: nextcloud
+          entryPoints:
+            - web
+          middlewares:
+            - nextcloud-headers
+            - https-redirect
+
+        nextcloud-https:
+          rule: "Host(`hetzner.moritzwm.de`)"
+          service: nextcloud
           entryPoints:
             - websecure
-          service: nextcloud
           tls:
             certResolver: letsencrypt
+          middlewares:
+            - nextcloud-headers
+            - nextcloud-redirectregex
 
       services:
         nextcloud:
           loadBalancer:
             servers:
               - url: "http://10.233.1.2:80"
+            passHostHeader: true
 
       middlewares:
+        https-redirect:
+          redirectScheme:
+            scheme: https
+            permanent: true
         nextcloud-redirectregex:
           redirectRegex:
             permanent: true
             regex: "https://(.*)/.well-known/(card|cal)dav"
             replacement: "https://$$1/remote.php/dav/"
+        nextcloud-headers:
+          headers:
+            customFrameOptionsValue: SAMEORIGIN
+            customRequestHeaders:
+              Strict-Transport-Security: 15552000
   '';
 
   # NixOS container for Nextcloud
@@ -32,7 +54,7 @@
     hostAddress = "10.233.1.1";
     localAddress = "10.233.1.2";
 
-    config = { config, pkgs, ... }: {
+    config = { config, pkgs, lib, ... }: {
       system.stateVersion = "25.11";
 
       # Networking inside container
@@ -44,6 +66,7 @@
       # PostgreSQL database
       services.postgresql = {
         enable = true;
+        package = pkgs.postgresql_15;
         ensureDatabases = [ "nextcloud" ];
         ensureUsers = [{
           name = "nextcloud";
@@ -56,15 +79,14 @@
         enable = true;
         # TODO change back to 31
         package = pkgs.nextcloud32;
-        hostName = "hetzner.moritzwm.de";  # Change this to your domain
+        hostName = "hetzner.moritzwm.de";
 
         config = {
           dbtype = "pgsql";
           dbuser = "nextcloud";
           dbhost = "/run/postgresql";
           dbname = "nextcloud";
-
-          adminuser = "admin";
+          adminuser = "moritz-admin";
           adminpassFile = "/var/lib/nextcloud/admin-pass";
         };
 
@@ -73,12 +95,6 @@
           trusted_proxies = [ "10.233.1.1" ];
           default_phone_region = "DE";
         };
-
-        # Enable common apps
-        # extraApps = with config.services.nextcloud.package.packages.apps; {
-          # inherit contacts calendar tasks notes;
-        # };
-        # extraAppsEnable = true;
 
         # PHP settings for better performance
         phpOptions = {
@@ -93,6 +109,11 @@
           "post_max_size" = lib.mkForce "16G";
           "max_execution_time" = "300";
         };
+      };
+
+      systemd.services."nextcloud-setup" = {
+        requires = ["postgresql.service"];
+        after = ["postgresql.service"];
       };
 
       # Automatically initialize admin password if not exists

@@ -54,7 +54,8 @@
       # Nextcloud service
       services.nextcloud = {
         enable = true;
-        package = pkgs.nextcloud30;
+        # TODO change back to 31
+        package = pkgs.nextcloud32;
         hostName = "hetzner.moritzwm.de";  # Change this to your domain
 
         config = {
@@ -88,13 +89,10 @@
           "opcache.save_comments" = "1";
           "opcache.revalidate_freq" = "1";
           "memory_limit" = "512M";
-          "upload_max_filesize" = "16G";
-          "post_max_size" = "16G";
+          "upload_max_filesize" = lib.mkForce "16G";
+          "post_max_size" = lib.mkForce "16G";
           "max_execution_time" = "300";
         };
-
-        # Enable nginx inside container
-        nginx.enable = true;
       };
 
       # Automatically initialize admin password if not exists

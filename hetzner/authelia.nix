@@ -114,6 +114,39 @@
           storage.local.path = "/var/lib/authelia-main/db.sqlite3";
 
           notifier.filesystem.filename = "/var/lib/authelia-main/notification.txt";
+
+          # OpenID Connect Provider for Nextcloud
+          identity_providers.oidc = {
+            jwks = [{
+              key_id = "main";
+              algorithm = "RS256";
+              use = "sig";
+              key = ''{{ secret "/var/lib/authelia-main/oidc_jwks_key.pem" | mindent 10 "|" | msquote }}'';
+            }];
+
+            authorization_policies = {
+              nextcloud = {
+                default_policy = "two_factor";
+                rules = [{
+                  subject = "group:admins";
+                  policy = "two_factor";
+                }];
+              };
+            };
+
+            clients = [{
+              client_id = "nextcloud";
+              client_name = "Nextcloud";
+              client_secret = ''{{ secret "/var/lib/authelia-main/oidc_nextcloud_secret_hash" }}'';
+              authorization_policy = "two_factor";
+              require_pkce = true;
+              pkce_challenge_method = "S256";
+              redirect_uris = [ "https://hetzner.moritzwm.de/apps/oidc_login/oidc" ];
+              scopes = [ "openid" "profile" "email" "groups" ];
+              token_endpoint_auth_method = "client_secret_basic";
+              userinfo_signed_response_alg = "none";
+            }];
+          };
         };
       };
 
@@ -140,6 +173,31 @@
           generate_secret "jwt_secret"
           generate_secret "session_secret"
           generate_secret "storage_encryption_key"
+
+          # Generate OIDC JWKS RSA key if it doesn't exist
+          if [ ! -f "$SECRETS_DIR/oidc_jwks_key.pem" ]; then
+            ${pkgs.openssl}/bin/openssl genrsa -out "$SECRETS_DIR/oidc_jwks_key.pem" 4096
+            chmod 600 "$SECRETS_DIR/oidc_jwks_key.pem"
+            echo "Generated OIDC JWKS RSA key"
+          fi
+
+          # Generate OIDC client secret for Nextcloud if it doesn't exist
+          if [ ! -f "$SECRETS_DIR/oidc_nextcloud_secret" ]; then
+            # Generate a random alphanumeric secret (64 chars)
+            ${pkgs.openssl}/bin/openssl rand -hex 32 > "$SECRETS_DIR/oidc_nextcloud_secret"
+            chmod 600 "$SECRETS_DIR/oidc_nextcloud_secret"
+            echo "Generated OIDC Nextcloud client secret"
+            echo "IMPORTANT: Copy this secret to Nextcloud config!"
+            cat "$SECRETS_DIR/oidc_nextcloud_secret"
+          fi
+
+          # Generate hashed version of the client secret for Authelia config
+          if [ ! -f "$SECRETS_DIR/oidc_nextcloud_secret_hash" ]; then
+            SECRET=$(cat "$SECRETS_DIR/oidc_nextcloud_secret")
+            ${pkgs.authelia}/bin/authelia crypto hash generate pbkdf2 --variant sha512 --password "$SECRET" | grep 'Digest:' | cut -d' ' -f2 > "$SECRETS_DIR/oidc_nextcloud_secret_hash"
+            chmod 600 "$SECRETS_DIR/oidc_nextcloud_secret_hash"
+            echo "Generated OIDC Nextcloud client secret hash"
+          fi
 
           # Create users file if it doesn't exist
           if [ ! -f "$SECRETS_DIR/users.yml" ]; then

@@ -94,7 +94,35 @@
           overwriteprotocol = "https";
           trusted_proxies = [ "10.233.1.1" ];
           default_phone_region = "DE";
+
+          # OpenID Connect Login via Authelia
+          oidc_login_provider_url = "https://auth.moritzwm.de";
+          oidc_login_client_id = "nextcloud";
+          oidc_login_client_secret = {
+            _secret = "/var/lib/nextcloud/oidc_secret";
+          };
+          oidc_login_auto_redirect = false;  # Set to true to skip Nextcloud login page
+          oidc_login_logout_url = "https://auth.moritzwm.de/logout";
+          oidc_login_button_text = "Log in with Authelia";
+          oidc_login_code_challenge_method = "S256";
+
+          # Map OIDC claims to Nextcloud user attributes
+          oidc_login_attributes = {
+            id = "preferred_username";
+            name = "name";
+            mail = "email";
+            groups = "groups";
+          };
+
+          # Create users automatically on first OIDC login
+          oidc_login_disable_registration = false;
         };
+
+        # Install OIDC Login app
+        extraApps = {
+          inherit (config.services.nextcloud.package.packages.apps) oidc_login;
+        };
+        extraAppsEnable = true;
 
         # PHP settings for better performance
         phpOptions = {
@@ -125,11 +153,24 @@
           RemainAfterExit = true;
         };
         script = ''
+          mkdir -p /var/lib/nextcloud
+
           if [ ! -f /var/lib/nextcloud/admin-pass ]; then
-            mkdir -p /var/lib/nextcloud
             echo "juWah9UgeeSh9du3Ied7du0bWaiy5uudeez6oMei!" > /var/lib/nextcloud/admin-pass
             chmod 600 /var/lib/nextcloud/admin-pass
             echo "Generated initial admin password. Please change it after first login!"
+          fi
+
+          # Create placeholder for OIDC secret if it doesn't exist
+          # NOTE: Copy the secret from /var/lib/authelia-main/oidc_nextcloud_secret on the host
+          if [ ! -f /var/lib/nextcloud/oidc_secret ]; then
+            echo "REPLACE_WITH_AUTHELIA_OIDC_SECRET" > /var/lib/nextcloud/oidc_secret
+            chmod 600 /var/lib/nextcloud/oidc_secret
+            echo "Created OIDC secret placeholder."
+            echo "IMPORTANT: Copy the secret from the Authelia container:"
+            echo "  nixos-container run authelia -- cat /var/lib/authelia-main/oidc_nextcloud_secret"
+            echo "Then paste it into the Nextcloud container:"
+            echo "  nixos-container run nextcloud -- tee /var/lib/nextcloud/oidc_secret"
           fi
         '';
       };

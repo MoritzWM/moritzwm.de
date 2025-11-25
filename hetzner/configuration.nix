@@ -11,6 +11,7 @@
     ./disk-config.nix
     ./traefik.nix
     ./nextcloud.nix
+    ./authelia.nix
   ];
   boot.loader.grub = {
     efiSupport = true;

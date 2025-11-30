@@ -96,26 +96,37 @@
           default_phone_region = "DE";
 
           # OpenID Connect Login via Authelia
+          lost_password_link = "disabled";
           oidc_login_provider_url = "https://auth.moritzwm.de";
-          oidc_login_client_id = "nextcloud";
-          oidc_login_client_secret = {
-            _secret = "/var/lib/nextcloud/oidc_secret";
-          };
-          oidc_login_auto_redirect = false;  # Set to true to skip Nextcloud login page
           oidc_login_logout_url = "https://auth.moritzwm.de/logout";
+          oidc_login_client_id = "nextcloud";
+          oidc_login_client_secret = "Ou6oothiAhlie8ChBeebo3peXu6gahvowe8PeeSezae7feiYvooShaR3Il2beo9f";
+          oidc_login_auto_redirect = false;  # Set to true to skip Nextcloud login page
+          oidc_login_end_session_redirect = false;
           oidc_login_button_text = "Log in with Authelia";
-          oidc_login_code_challenge_method = "S256";
-
-          # Map OIDC claims to Nextcloud user attributes
+          oidc_login_hide_password_form = false;
+          oidc_login_use_id_token = false;
           oidc_login_attributes = {
             id = "preferred_username";
             name = "name";
             mail = "email";
             groups = "groups";
           };
-
-          # Create users automatically on first OIDC login
-          oidc_login_disable_registration = false;
+          oidc_login_default_group = "oidc";
+          oidc_login_use_external_storage = false;
+          oidc_login_scope = "openid profile email groups nextcloud_userinfo";
+          oidc_login_proxy_ldap = false;
+          oidc_login_disable_registration = true;
+          oidc_login_redir_fallback = false;
+          oidc_login_tls_verify = true;
+          oidc_create_groups = false;
+          oidc_login_webdav_enabled = false;
+          oidc_login_password_authentication = false;
+          oidc_login_public_key_caching_time = 86400;
+          oidc_login_min_time_between_jwks_requests = 10;
+          oidc_login_well_known_caching_time = 86400;
+          oidc_login_update_avatar = false;
+          oidc_login_code_challenge_method = "S256";
         };
 
         # Install OIDC Login app

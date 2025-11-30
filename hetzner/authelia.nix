@@ -72,25 +72,13 @@
 
           authentication_backend.file = {
             path = "/var/lib/authelia-main/users.yml";
-            password = {
-              algorithm = "argon2id";
-              iterations = 3;
-              memory = 65536;
-              parallelism = 4;
-              key_length = 32;
-              salt_length = 16;
-            };
           };
 
           access_control = {
             default_policy = "deny";
             rules = [
-              # Allow Nextcloud to be accessed without Authelia (it has its own auth)
-              { domain = "hetzner.moritzwm.de"; policy = "bypass"; }
-              # Authelia itself should be accessible
+              { domain = "hetzner.moritzwm.de"; policy = "two_factor"; }
               { domain = "auth.moritzwm.de"; policy = "bypass"; }
-              # Protected services require two_factor
-              { domain = "*.moritzwm.de"; policy = "two_factor"; }
             ];
           };
 
@@ -117,34 +105,36 @@
 
           # OpenID Connect Provider for Nextcloud
           identity_providers.oidc = {
-            jwks = [{
-              key_id = "main";
-              algorithm = "RS256";
-              use = "sig";
-              key = ''{{ secret "/var/lib/authelia-main/oidc_jwks_key.pem" | mindent 10 "|" | msquote }}'';
-            }];
-
-            authorization_policies = {
-              nextcloud = {
-                default_policy = "two_factor";
-                rules = [{
-                  subject = "group:admins";
-                  policy = "two_factor";
-                }];
+            claims_policies = {
+              nextcloud_userinfo = {
+                custom_claims = {
+                    is_nextcloud_admin = {};
+                };
               };
             };
-
+            scopes = {
+                nextcloud_userinfo = {
+                    claims = [ "is_nextcloud_admin" ];
+                };
+            };
             clients = [{
+              # TODO change
+              # https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#how-do-i-generate-a-client-identifier-or-client-secret
               client_id = "nextcloud";
               client_name = "Nextcloud";
-              client_secret = ''{{ secret "/var/lib/authelia-main/oidc_nextcloud_secret_hash" }}'';
+              client_secret = "Ou6oothiAhlie8ChBeebo3peXu6gahvowe8PeeSezae7feiYvooShaR3Il2beo9f";
+              public = false;
               authorization_policy = "two_factor";
               require_pkce = true;
               pkce_challenge_method = "S256";
+              claims_policy = "nextcloud_userinfo";
               redirect_uris = [ "https://hetzner.moritzwm.de/apps/oidc_login/oidc" ];
-              scopes = [ "openid" "profile" "email" "groups" ];
-              token_endpoint_auth_method = "client_secret_basic";
+              scopes = [ "openid" "profile" "email" "groups" "nextcloud_userinfo" ];
+              response_types = [ "code" ];
+              grant_types = [ "authorization_code" ];
+              access_token_signed_response_alg = "none";
               userinfo_signed_response_alg = "none";
+              token_endpoint_auth_method = "client_secret_basic";
             }];
           };
         };

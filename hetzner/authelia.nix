@@ -194,10 +194,9 @@
             cat > "$SECRETS_DIR/users.yml" << 'USERS'
           users:
             moritz:
-              disabled: false
               displayname: "Moritz"
               # Generate this hash with: nix-shell -p authelia --run "authelia crypto hash generate argon2 --password 'yourpassword'"
-              password: "$argon2id$v=19$m=65536,t=3,p=4$CHANGE_THIS_PASSWORD_HASH"
+              password: "$argon2id$v=19$m=65536,t=3,p=4$MHlJcrzfED1a/Fj+MKFPTQ$9EsBLzZxidWCjnIAblNYdKdrCqdJjEHILC0bbw9NNQA"
               email: mail@moritzwm.de
               groups:
                 - admins

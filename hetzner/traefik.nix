@@ -4,7 +4,7 @@
   networking.nat = {
     enable = true;
     internalInterfaces = ["ve-+"];
-    externalInterface = "eth0";
+    externalInterface = "enp1s0";
   };
 
   services.traefik = {

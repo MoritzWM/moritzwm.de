@@ -56,6 +56,8 @@
 
     config = { config, pkgs, lib, ... }: {
       system.stateVersion = "25.11";
+      networking.useHostResolvConf = lib.mkForce false;
+      services.resolved.enable = true;
 
       # Networking inside container
       networking.firewall = {

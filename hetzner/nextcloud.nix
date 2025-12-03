@@ -129,12 +129,6 @@
           oidc_login_code_challenge_method = "S256";
         };
 
-        # Install OIDC Login app
-        extraApps = {
-          inherit (config.services.nextcloud.package.packages.apps) oidc_login;
-        };
-        extraAppsEnable = true;
-
         # PHP settings for better performance
         phpOptions = {
           "opcache.enable" = "1";

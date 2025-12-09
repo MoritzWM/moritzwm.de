@@ -20,6 +20,7 @@
           tls:
             certResolver: letsencrypt
           middlewares:
+            - authelia
             - nextcloud-headers
             - nextcloud-redirectregex
 
@@ -82,6 +83,11 @@
         # TODO change back to 31
         package = pkgs.nextcloud32;
         hostName = "hetzner.moritzwm.de";
+        
+        extraApps = {
+            inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks user_oidc;
+        };
+        extraAppsEnable = true;
 
         config = {
           dbtype = "pgsql";

@@ -119,7 +119,6 @@
               authorization_policy = "two_factor";
               require_pkce = true;
               pkce_challenge_method = "S256";
-              claims_policy = "nextcloud_userinfo";
               redirect_uris = [ "https://hetzner.moritzwm.de/apps/user_oidc/code" ];
               scopes = [ "openid" "profile" "email" "groups" ];
               response_types = [ "code" ];

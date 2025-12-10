@@ -80,7 +80,6 @@
       # Nextcloud service
       services.nextcloud = {
         enable = true;
-        # TODO change back to 31
         package = pkgs.nextcloud32;
         hostName = "hetzner.moritzwm.de";
         
@@ -102,39 +101,10 @@
           overwriteprotocol = "https";
           trusted_proxies = [ "10.233.1.1" ];
           default_phone_region = "DE";
-
-          # OpenID Connect Login via Authelia
           lost_password_link = "disabled";
-          oidc_login_provider_url = "https://auth.moritzwm.de";
-          oidc_login_logout_url = "https://auth.moritzwm.de/logout";
-          oidc_login_client_id = "nextcloud";
-          oidc_login_client_secret = "Ou6oothiAhlie8ChBeebo3peXu6gahvowe8PeeSezae7feiYvooShaR3Il2beo9f";
-          oidc_login_auto_redirect = false;  # Set to true to skip Nextcloud login page
-          oidc_login_end_session_redirect = false;
-          oidc_login_button_text = "Log in with Authelia";
-          oidc_login_hide_password_form = false;
-          oidc_login_use_id_token = false;
-          oidc_login_attributes = {
-            id = "preferred_username";
-            name = "name";
-            mail = "email";
-            groups = "groups";
+          user_oidc = {
+            default_token_endpoint_auth_method = "client_secret_post";
           };
-          oidc_login_default_group = "oidc";
-          oidc_login_use_external_storage = false;
-          oidc_login_scope = "openid profile email groups nextcloud_userinfo";
-          oidc_login_proxy_ldap = false;
-          oidc_login_disable_registration = true;
-          oidc_login_redir_fallback = false;
-          oidc_login_tls_verify = true;
-          oidc_create_groups = false;
-          oidc_login_webdav_enabled = false;
-          oidc_login_password_authentication = false;
-          oidc_login_public_key_caching_time = 86400;
-          oidc_login_min_time_between_jwks_requests = 10;
-          oidc_login_well_known_caching_time = 86400;
-          oidc_login_update_avatar = false;
-          oidc_login_code_challenge_method = "S256";
         };
 
         # PHP settings for better performance
@@ -172,18 +142,6 @@
             echo "juWah9UgeeSh9du3Ied7du0bWaiy5uudeez6oMei!" > /var/lib/nextcloud/admin-pass
             chmod 600 /var/lib/nextcloud/admin-pass
             echo "Generated initial admin password. Please change it after first login!"
-          fi
-
-          # Create placeholder for OIDC secret if it doesn't exist
-          # NOTE: Copy the secret from /var/lib/authelia-main/oidc_nextcloud_secret on the host
-          if [ ! -f /var/lib/nextcloud/oidc_secret ]; then
-            echo "REPLACE_WITH_AUTHELIA_OIDC_SECRET" > /var/lib/nextcloud/oidc_secret
-            chmod 600 /var/lib/nextcloud/oidc_secret
-            echo "Created OIDC secret placeholder."
-            echo "IMPORTANT: Copy the secret from the Authelia container:"
-            echo "  nixos-container run authelia -- cat /var/lib/authelia-main/oidc_nextcloud_secret"
-            echo "Then paste it into the Nextcloud container:"
-            echo "  nixos-container run nextcloud -- tee /var/lib/nextcloud/oidc_secret"
           fi
         '';
       };

@@ -105,36 +105,28 @@
 
           # OpenID Connect Provider for Nextcloud
           identity_providers.oidc = {
-            claims_policies = {
-              nextcloud_userinfo = {
-                custom_claims = {
-                    is_nextcloud_admin = {};
-                };
-              };
-            };
-            scopes = {
-                nextcloud_userinfo = {
-                    claims = [ "is_nextcloud_admin" ];
-                };
-            };
             clients = [{
               # TODO change
               # https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#how-do-i-generate-a-client-identifier-or-client-secret
-              client_id = "nextcloud";
+              # Random Password: boq0fc_mb4e~ht5zmA5iF7Qiq33saCiqE-OOTV2v4SdQnuiXk08xSr42p96hHcCuGDjyNooO
+              # Digest: $pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q
+              # In Nextcloud container, run:
+              # nextcloud-occ user_oidc:provider Authelia --clientid="qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH" --clientsecret="$pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q" --discoveryuri="https://auth.moritzwm.de/.well-known/openid-configuration"
+              client_id = "qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH";
               client_name = "Nextcloud";
-              client_secret = "Ou6oothiAhlie8ChBeebo3peXu6gahvowe8PeeSezae7feiYvooShaR3Il2beo9f";
+              client_secret = "$pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q";
               public = false;
               authorization_policy = "two_factor";
               require_pkce = true;
               pkce_challenge_method = "S256";
               claims_policy = "nextcloud_userinfo";
-              redirect_uris = [ "https://hetzner.moritzwm.de/apps/oidc_login/oidc" ];
-              scopes = [ "openid" "profile" "email" "groups" "nextcloud_userinfo" ];
+              redirect_uris = [ "https://hetzner.moritzwm.de/apps/user_oidc/code" ];
+              scopes = [ "openid" "profile" "email" "groups" ];
               response_types = [ "code" ];
               grant_types = [ "authorization_code" ];
               access_token_signed_response_alg = "none";
               userinfo_signed_response_alg = "none";
-              token_endpoint_auth_method = "client_secret_basic";
+              token_endpoint_auth_method = "client_secret_post";
             }];
           };
         };
@@ -169,24 +161,6 @@
             ${pkgs.openssl}/bin/openssl genrsa -out "$SECRETS_DIR/oidc_jwks_key.pem" 4096
             chmod 600 "$SECRETS_DIR/oidc_jwks_key.pem"
             echo "Generated OIDC JWKS RSA key"
-          fi
-
-          # Generate OIDC client secret for Nextcloud if it doesn't exist
-          if [ ! -f "$SECRETS_DIR/oidc_nextcloud_secret" ]; then
-            # Generate a random alphanumeric secret (64 chars)
-            ${pkgs.openssl}/bin/openssl rand -hex 32 > "$SECRETS_DIR/oidc_nextcloud_secret"
-            chmod 600 "$SECRETS_DIR/oidc_nextcloud_secret"
-            echo "Generated OIDC Nextcloud client secret"
-            echo "IMPORTANT: Copy this secret to Nextcloud config!"
-            cat "$SECRETS_DIR/oidc_nextcloud_secret"
-          fi
-
-          # Generate hashed version of the client secret for Authelia config
-          if [ ! -f "$SECRETS_DIR/oidc_nextcloud_secret_hash" ]; then
-            SECRET=$(cat "$SECRETS_DIR/oidc_nextcloud_secret")
-            ${pkgs.authelia}/bin/authelia crypto hash generate pbkdf2 --variant sha512 --password "$SECRET" | grep 'Digest:' | cut -d' ' -f2 > "$SECRETS_DIR/oidc_nextcloud_secret_hash"
-            chmod 600 "$SECRETS_DIR/oidc_nextcloud_secret_hash"
-            echo "Generated OIDC Nextcloud client secret hash"
           fi
 
           # Create users file if it doesn't exist

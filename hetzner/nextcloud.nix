@@ -143,6 +143,8 @@
             chmod 600 /var/lib/nextcloud/admin-pass
             echo "Generated initial admin password. Please change it after first login!"
           fi
+          ${pkgs.nextcloud-occ}/bin/nextcloud-occ user_oidc:provider Authelia --clientid='qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH' --clientsecret='boq0fc_mb4e~ht5zmA5iF7Qiq33saCiqE-OOTV2v4SdQnuiXk08xSr42p96hHcCuGDjyNooO' --discoveryuri='https://auth.moritzwm.de/.well-known/openid-configuration'
+          
         '';
       };
 

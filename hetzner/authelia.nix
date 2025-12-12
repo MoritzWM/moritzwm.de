@@ -51,6 +51,8 @@
           jwtSecretFile = "/var/lib/authelia-main/jwt_secret";
           storageEncryptionKeyFile = "/var/lib/authelia-main/storage_encryption_key";
           sessionSecretFile = "/var/lib/authelia-main/session_secret";
+          oidcIssuerPrivateKeyFile = "/var/lib/authelia-main/jwks_private.pem";
+          oidcHmacSecretFile = "/var/lib/authelia-main/oidc_hmac_secret";
         };
         settings = {
           theme = "dark";
@@ -105,13 +107,15 @@
 
           # OpenID Connect Provider for Nextcloud
           identity_providers.oidc = {
+            # TODO add JWKS
+            # TODO move to secret
             clients = [{
               # TODO change
               # https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#how-do-i-generate-a-client-identifier-or-client-secret
               # Random Password: boq0fc_mb4e~ht5zmA5iF7Qiq33saCiqE-OOTV2v4SdQnuiXk08xSr42p96hHcCuGDjyNooO
               # Digest: $pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q
               # In Nextcloud container, run:
-              # nextcloud-occ user_oidc:provider Authelia --clientid="qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH" --clientsecret="$pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q" --discoveryuri="https://auth.moritzwm.de/.well-known/openid-configuration"
+              # nextcloud-occ user_oidc:provider Authelia --clientid="qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH" --clientsecret="boq0fc_mb4e~ht5zmA5iF7Qiq33saCiqE-OOTV2v4SdQnuiXk08xSr42p96hHcCuGDjyNooO" --discoveryuri="https://auth.moritzwm.de/.well-known/openid-configuration"
               client_id = "qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH";
               client_name = "Nextcloud";
               client_secret = "$pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q";
@@ -154,12 +158,14 @@
           generate_secret "jwt_secret"
           generate_secret "session_secret"
           generate_secret "storage_encryption_key"
+          generate_secret "oidc_hmac_secret"
 
           # Generate OIDC JWKS RSA key if it doesn't exist
-          if [ ! -f "$SECRETS_DIR/oidc_jwks_key.pem" ]; then
-            ${pkgs.openssl}/bin/openssl genrsa -out "$SECRETS_DIR/oidc_jwks_key.pem" 4096
-            chmod 600 "$SECRETS_DIR/oidc_jwks_key.pem"
-            echo "Generated OIDC JWKS RSA key"
+          if [ ! -f "$SECRETS_DIR/jwks_private.pem" ]; then
+            ${pkgs.authelia}/bin/authelia  crypto pair rsa generate --file.public-key "$SECRETS_DIR/jwks_public.pem" --file.private-key "$SECRETS_DIR/jwks_private.pem"
+            chmod 600 "$SECRETS_DIR/jwks_public.pem"
+            chmod 600 "$SECRETS_DIR/jwks_private.pem"
+            echo "Generated OIDC JWKS RSA keypair"
           fi
 
           # Create users file if it doesn't exist

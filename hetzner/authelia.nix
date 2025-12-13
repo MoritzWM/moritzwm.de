@@ -1,9 +1,81 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, sops-nix, ... }:
 {
+  # SOPS secrets for Authelia
+  sops.secrets.authelia_jwt_secret = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "jwt_secret";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+
+  sops.secrets.authelia_session_secret = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "session_secret";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+
+  sops.secrets.authelia_storage_encryption_key = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "storage_encryption_key";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+
+  sops.secrets.authelia_oidc_hmac_secret = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "oidc_hmac_secret";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+
+  sops.secrets.authelia_jwks_private_key = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "jwks_private_key";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+
+  sops.secrets.nextcloud_oidc_client_id = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "nextcloud_client_id";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+
+  sops.secrets.nextcloud_oidc_client_secret = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "nextcloud_client_secret";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+  sops.secrets.nextcloud_oidc_client_secret_hash = {
+    sopsFile = ./secrets/authelia.yaml;
+    key = "nextcloud_client_secret_hash";
+    owner = "root";
+    group = "root";
+    mode = "0600";
+  };
+
   # Traefik dynamic configuration for Authelia
   environment.etc."traefik/dynamic/authelia.yml".text = ''
     http:
       routers:
+        authelia-http:
+          rule: "Host(`auth.moritzwm.de`)"
+          service: authelia
+          entryPoints:
+            - web
+          middlewares:
+            - https-redirect
+
         authelia:
           rule: "Host(`auth.moritzwm.de`)"
           service: authelia
@@ -19,6 +91,11 @@
               - url: "http://10.233.2.2:9091"
 
       middlewares:
+        https-redirect:
+          redirectScheme:
+            scheme: https
+            # permanent: true
+
         authelia:
           forwardAuth:
             address: "http://10.233.2.2:9091/api/authz/forward-auth"
@@ -37,6 +114,14 @@
     hostAddress = "10.233.2.1";
     localAddress = "10.233.2.2";
 
+    # Bind mount decrypted secrets from host into container
+    bindMounts = {
+      "/var/lib/authelia-secrets" = {
+        hostPath = "/run/secrets";
+        isReadOnly = true;
+      };
+    };
+
     config = { config, pkgs, lib, ... }: {
       system.stateVersion = "25.11";
 
@@ -48,11 +133,11 @@
       services.authelia.instances.main = {
         enable = true;
         secrets = {
-          jwtSecretFile = "/var/lib/authelia-main/jwt_secret";
-          storageEncryptionKeyFile = "/var/lib/authelia-main/storage_encryption_key";
-          sessionSecretFile = "/var/lib/authelia-main/session_secret";
-          oidcIssuerPrivateKeyFile = "/var/lib/authelia-main/jwks_private.pem";
-          oidcHmacSecretFile = "/var/lib/authelia-main/oidc_hmac_secret";
+          jwtSecretFile = "/var/lib/authelia-secrets/authelia_jwt_secret";
+          storageEncryptionKeyFile = "/var/lib/authelia-secrets/authelia_storage_encryption_key";
+          sessionSecretFile = "/var/lib/authelia-secrets/authelia_session_secret";
+          oidcIssuerPrivateKeyFile = "/var/lib/authelia-secrets/authelia_jwks_private_key";
+          oidcHmacSecretFile = "/var/lib/authelia-secrets/authelia_oidc_hmac_secret";
         };
         settings = {
           theme = "dark";
@@ -107,18 +192,10 @@
 
           # OpenID Connect Provider for Nextcloud
           identity_providers.oidc = {
-            # TODO add JWKS
-            # TODO move to secret
             clients = [{
-              # TODO change
-              # https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#how-do-i-generate-a-client-identifier-or-client-secret
-              # Random Password: boq0fc_mb4e~ht5zmA5iF7Qiq33saCiqE-OOTV2v4SdQnuiXk08xSr42p96hHcCuGDjyNooO
-              # Digest: $pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q
-              # In Nextcloud container, run:
-              # nextcloud-occ user_oidc:provider Authelia --clientid="qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH" --clientsecret="boq0fc_mb4e~ht5zmA5iF7Qiq33saCiqE-OOTV2v4SdQnuiXk08xSr42p96hHcCuGDjyNooO" --discoveryuri="https://auth.moritzwm.de/.well-known/openid-configuration"
-              client_id = "qNSntqAqO2MnumAAJzlvuiKkxYoyy5ExccOBocd6.bKS_C5oHGpi620A.pO7vh-CiLBQeagH";
+              client_id = "${builtins.readFile config.sops.secrets.nextcloud_oidc_client_id.path}";
               client_name = "Nextcloud";
-              client_secret = "$pbkdf2-sha512$310000$6/TDVR1IzGQfrtE6yNCFvA$OiN8pG3.q3/TAdTQ8rJMD9KRDJ1DJIfqlw.05wC0xq4sZiDTrxpOPKI8UMj1TLe/1ZXrOunv15HEgsKtXPyn4Q";
+              client_secret = "${builtins.readFile config.sops.secrets.nextcloud_oidc_client_secret_hash.path}";
               public = false;
               authorization_policy = "two_factor";
               require_pkce = true;
@@ -135,8 +212,8 @@
         };
       };
 
-      # Generate secrets and users file if they don't exist
-      systemd.services.authelia-init = {
+      # Create users file if it doesn't exist
+      systemd.services.authelia-init-users = {
         wantedBy = [ "multi-user.target" ];
         before = [ "authelia-main.service" ];
         serviceConfig = {
@@ -146,27 +223,6 @@
         script = ''
           SECRETS_DIR="/var/lib/authelia-main"
           mkdir -p "$SECRETS_DIR"
-
-          generate_secret() {
-            if [ ! -f "$SECRETS_DIR/$1" ]; then
-              ${pkgs.openssl}/bin/openssl rand -hex 32 > "$SECRETS_DIR/$1"
-              chmod 600 "$SECRETS_DIR/$1"
-              echo "Generated $1"
-            fi
-          }
-
-          generate_secret "jwt_secret"
-          generate_secret "session_secret"
-          generate_secret "storage_encryption_key"
-          generate_secret "oidc_hmac_secret"
-
-          # Generate OIDC JWKS RSA key if it doesn't exist
-          if [ ! -f "$SECRETS_DIR/jwks_private.pem" ]; then
-            ${pkgs.authelia}/bin/authelia  crypto pair rsa generate --file.public-key "$SECRETS_DIR/jwks_public.pem" --file.private-key "$SECRETS_DIR/jwks_private.pem"
-            chmod 600 "$SECRETS_DIR/jwks_public.pem"
-            chmod 600 "$SECRETS_DIR/jwks_private.pem"
-            echo "Generated OIDC JWKS RSA keypair"
-          fi
 
           # Create users file if it doesn't exist
           if [ ! -f "$SECRETS_DIR/users.yml" ]; then

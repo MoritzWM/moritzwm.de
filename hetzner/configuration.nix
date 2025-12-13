@@ -8,6 +8,7 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
+    sops-nix.nixosModules.sops
     ./disk-config.nix
     ./traefik.nix
     ./nextcloud.nix
@@ -30,6 +31,12 @@
   ];
   system.stateVersion = "25.11";
   zramSwap.enable = true;
+  services.openssh.hostKeys = [
+    {
+        path = "/etc/ssh/ssh_host_ed25519_key";
+        type = "ed25519";
+    };
+  ];
   users.users.root = {
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJqrx0JsGPUwEgiJqcXaPc4n7elVfq/mp4A9qIAOiXfg deck@steamdeck"

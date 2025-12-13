@@ -1,0 +1,7 @@
+keys:
+  - &admin_moritz age1pqe876yhmjx7ppjg0j9ycm60l40kn0fdhvg5rv63yhxxflqwyf6qmrdajw
+creation_rules:
+  - path_regex: hetzner/secrets/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *admin_moritz

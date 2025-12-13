@@ -14,10 +14,10 @@
       entryPoints = {
         web = {
           address = ":80";
-          http.redirections.entrypoint = {
-            to = "websecure";
-            scheme = "https";
-          };
+          # http.redirections.entrypoint = {
+            # to = "websecure";
+            # scheme = "https";
+          # };
         };
         websecure = {
           address = ":443";

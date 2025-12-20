@@ -1,5 +1,10 @@
 { config, pkgs, lib, ... }:
 {
+  sops.secrets."nextcloud/admin-pass" = {
+    owner = "root";
+    group = "root";
+    mode = "0400";
+  };
   environment.etc."traefik/dynamic/nextcloud.yml".text = ''
     http:
       routers:
@@ -59,6 +64,12 @@
       system.stateVersion = "25.11";
       networking.useHostResolvConf = lib.mkForce false;
       services.resolved.enable = true;
+      bindMounts = {
+        "/var/lib/nextcloud/admin-pass" = {
+        hostPath = "${config.sops.secrets."nextcloud/admin_pass".path}";
+        isReadOnly = true;
+      };
+    };
 
       # Networking inside container
       networking.firewall = {
@@ -83,10 +94,10 @@
         package = pkgs.nextcloud32;
         hostName = "hetzner.moritzwm.de";
         
+        extraAppsEnable = true;
         extraApps = {
             inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks user_oidc;
         };
-        extraAppsEnable = true;
 
         config = {
           dbtype = "pgsql";
@@ -128,7 +139,7 @@
       };
 
       # Automatically initialize admin password if not exists
-      systemd.services.nextcloud-init-pass = {
+      systemd.services.nextcloud-init-oidc = {
         wantedBy = [ "multi-user.target" ];
         before = [ "nextcloud-setup.service" ];
         serviceConfig = {
@@ -136,16 +147,9 @@
           RemainAfterExit = true;
         };
         script = ''
-          mkdir -p /var/lib/nextcloud
-
-          if [ ! -f /var/lib/nextcloud/admin-pass ]; then
-            echo "juWah9UgeeSh9du3Ied7du0bWaiy5uudeez6oMei!" > /var/lib/nextcloud/admin-pass
-            chmod 600 /var/lib/nextcloud/admin-pass
-            echo "Generated initial admin password. Please change it after first login!"
-          fi
           ${config.services.nextcloud.occ}/bin/nextcloud-occ user_oidc:provider Authelia\
-            --clientid='${builtins.readFile config.sops.secrets.nextcloud_oidc_client_id.path}'\
-            --clientsecret='${builtins.readFile config.sops.secrets.nextcloud_oidc_client_secret.path}'\
+            --clientid='${builtins.readFile config.sops.secrets."nextcloud/oidc_client_id".path}'\
+            --clientsecret='${builtins.readFile config.sops.secrets."nextcloud/oidc_client_secret".path}'\
             --discoveryuri='https://auth.moritzwm.de/.well-known/openid-configuration'
         '';
       };

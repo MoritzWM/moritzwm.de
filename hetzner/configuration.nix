@@ -40,9 +40,24 @@
   ];
   sops.defaultSopsFile = ./secrets.yaml;
   users.users.root = {
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJqrx0JsGPUwEgiJqcXaPc4n7elVfq/mp4A9qIAOiXfg deck@steamdeck"
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpKJNbeP/AReFpACmNIvfbpukdm2BwpnmOVszlxDVMj moritz@moritz-arch"
-        ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJqrx0JsGPUwEgiJqcXaPc4n7elVfq/mp4A9qIAOiXfg deck@steamdeck"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpKJNbeP/AReFpACmNIvfbpukdm2BwpnmOVszlxDVMj moritz@moritz-arch"
+    ];
+  };
+  virtualisation.vmVariant = {
+    virtualisation.sharedDirectories = {
+      sops-key = {
+        source = "/home/moritz/.config/sops/age";
+        target = "/var/lib/sops-nix";
+      };
+    };
+    sops.age.keyFile = "/var/lib/sops-nix/keys.txt";
+
+    users.users.moritz = {
+        isNormalUser = true;
+        initialPassword = "test";
+        extraGroups = [ "wheel" ];
+    };
   };
 }

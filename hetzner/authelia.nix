@@ -1,53 +1,19 @@
 { config, pkgs, lib, sops-nix, ... }:
+let
+  # Define authelia secrets with proper ownership for the container
+  autheliaSecrets = [
+    "authelia/jwt_secret"
+    "authelia/session_secret"
+    "authelia/storage_encryption_key"
+    "authelia/oidc_hmac_secret"
+    "authelia/jwks_private_key"
+  ];
+  oidcSecrets = [
+    "nextcloud/oidc_client_id"
+    "nextcloud/oidc_client_secret_hash"
+  ];
+in
 {
-  # SOPS secrets for Authelia
-  sops.secrets."authelia/jwt_secret" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  sops.secrets."authelia/session_secret" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  sops.secrets."authelia/storage_encryption_key" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  sops.secrets."authelia/oidc_hmac_secret" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  sops.secrets."authelia/jwks_private_key" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  sops.secrets."nextcloud/oidc_client_id" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
-  sops.secrets."nextcloud/oidc_client_secret" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-  sops.secrets."nextcloud/oidc_client_secret_hash" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
-
   # Traefik dynamic configuration for Authelia
   environment.etc."traefik/dynamic/authelia.yml".text = ''
     http:
@@ -98,15 +64,35 @@
     hostAddress = "10.233.2.1";
     localAddress = "10.233.2.2";
 
-    # Bind mount decrypted secrets from host into container
+    # Bind mount the age key so sops-nix can decrypt secrets inside the container
     bindMounts = {
-      "/var/lib/authelia-secrets" = {
-        hostPath = "/run/secrets/authelia";
+      "/var/lib/sops-nix/keys.txt" = {
+        hostPath = "/var/lib/sops-nix/keys.txt";
         isReadOnly = true;
       };
     };
 
-    config = { config, pkgs, lib, sops-nix, ... }: {
+    config = { config, pkgs, lib, ... }: {
+      imports = [
+        sops-nix.nixosModules.sops
+      ];
+
+      # Configure sops-nix inside the container
+      sops = {
+        defaultSopsFile = ./secrets.yaml;
+        age.keyFile = "/var/lib/sops-nix/keys.txt";
+
+        # Authelia secrets owned by authelia user
+        secrets = lib.genAttrs autheliaSecrets (name: {
+          owner = "authelia-main";
+          group = "authelia-main";
+          mode = "0400";
+        }) // lib.genAttrs oidcSecrets (name: {
+          owner = "authelia-main";
+          group = "authelia-main";
+          mode = "0400";
+        });
+      };
       system.stateVersion = "25.11";
 
       networking.firewall = {
@@ -117,11 +103,11 @@
       services.authelia.instances.main = {
         enable = true;
         secrets = {
-          jwtSecretFile = "/var/lib/authelia-secrets/jwt_secret";
-          storageEncryptionKeyFile = "/var/lib/authelia-secrets/storage_encryption_key";
-          sessionSecretFile = "/var/lib/authelia-secrets/session_secret";
-          oidcIssuerPrivateKeyFile = "/var/lib/authelia-secrets/jwks_private_key";
-          oidcHmacSecretFile = "/var/lib/authelia-secrets/oidc_hmac_secret";
+          jwtSecretFile = config.sops.secrets."authelia/jwt_secret".path;
+          storageEncryptionKeyFile = config.sops.secrets."authelia/storage_encryption_key".path;
+          sessionSecretFile = config.sops.secrets."authelia/session_secret".path;
+          oidcIssuerPrivateKeyFile = config.sops.secrets."authelia/jwks_private_key".path;
+          oidcHmacSecretFile = config.sops.secrets."authelia/oidc_hmac_secret".path;
         };
         settings = {
           theme = "dark";
@@ -177,9 +163,9 @@
           # OpenID Connect Provider for Nextcloud
           identity_providers.oidc = {
             clients = [{
-              client_id = "${builtins.readFile config.sops.secrets."nextcloud/oidc_client_id".path}";
+              client_id = ''{{ secret "${config.sops.secrets."nextcloud/oidc_client_id".path}" }}'';
               client_name = "Nextcloud";
-              client_secret = "${builtins.readFile config.sops.secrets."nextcloud/oidc_client_secret_hash".path}";
+              client_secret = ''{{ secret "${config.sops.secrets."nextcloud/oidc_client_secret_hash".path}" }}'';
               public = false;
               authorization_policy = "two_factor";
               require_pkce = true;

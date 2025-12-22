@@ -1,10 +1,12 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, sops-nix, ... }:
+let
+  nextcloudSecrets = [
+    "nextcloud/admin_pass"
+    "nextcloud/oidc_client_id"
+    "nextcloud/oidc_client_secret"
+  ];
+in
 {
-  sops.secrets."nextcloud/admin-pass" = {
-    owner = "root";
-    group = "root";
-    mode = "0400";
-  };
   environment.etc."traefik/dynamic/nextcloud.yml".text = ''
     http:
       routers:
@@ -60,16 +62,35 @@
     hostAddress = "10.233.1.1";
     localAddress = "10.233.1.2";
 
-    config = { config, pkgs, lib, ... }: {
-      system.stateVersion = "25.11";
-      networking.useHostResolvConf = lib.mkForce false;
-      services.resolved.enable = true;
-      bindMounts = {
-        "/var/lib/nextcloud/admin-pass" = {
-        hostPath = "${config.sops.secrets."nextcloud/admin_pass".path}";
+    # Bind mount the age key so sops-nix can decrypt secrets inside the container
+    bindMounts = {
+      "/var/lib/sops-nix/keys.txt" = {
+        hostPath = "/var/lib/sops-nix/keys.txt";
         isReadOnly = true;
       };
     };
+
+    config = { config, pkgs, lib, ... }: {
+      imports = [
+        sops-nix.nixosModules.sops
+      ];
+
+      # Configure sops-nix inside the container
+      sops = {
+        defaultSopsFile = ./secrets.yaml;
+        age.keyFile = "/var/lib/sops-nix/keys.txt";
+
+        # Nextcloud secrets owned by nextcloud user
+        secrets = lib.genAttrs nextcloudSecrets (name: {
+          owner = "nextcloud";
+          group = "nextcloud";
+          mode = "0400";
+        });
+      };
+
+      system.stateVersion = "25.11";
+      networking.useHostResolvConf = lib.mkForce false;
+      services.resolved.enable = true;
 
       # Networking inside container
       networking.firewall = {
@@ -105,7 +126,7 @@
           dbhost = "/run/postgresql";
           dbname = "nextcloud";
           adminuser = "moritz-admin";
-          adminpassFile = "/var/lib/nextcloud/admin-pass";
+          adminpassFile = config.sops.secrets."nextcloud/admin_pass".path;
         };
 
         settings = {
@@ -138,18 +159,18 @@
         after = ["postgresql.service"];
       };
 
-      # Automatically initialize admin password if not exists
+      # Automatically initialize OIDC provider
       systemd.services.nextcloud-init-oidc = {
         wantedBy = [ "multi-user.target" ];
-        before = [ "nextcloud-setup.service" ];
+        after = [ "nextcloud-setup.service" ];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
         };
         script = ''
           ${config.services.nextcloud.occ}/bin/nextcloud-occ user_oidc:provider Authelia\
-            --clientid='${builtins.readFile config.sops.secrets."nextcloud/oidc_client_id".path}'\
-            --clientsecret='${builtins.readFile config.sops.secrets."nextcloud/oidc_client_secret".path}'\
+            --clientid="$(cat ${config.sops.secrets."nextcloud/oidc_client_id".path})"\
+            --clientsecret="$(cat ${config.sops.secrets."nextcloud/oidc_client_secret".path})"\
             --discoveryuri='https://auth.moritzwm.de/.well-known/openid-configuration'
         '';
       };

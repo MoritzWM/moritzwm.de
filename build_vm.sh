@@ -2,3 +2,4 @@
 set -e
 nix run nixpkgs#nixos-rebuild -- build-vm --flake .#hetzner
 ./result/bin/run-hetzner-vm
+rm hetzner.qcow2

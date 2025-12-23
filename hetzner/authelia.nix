@@ -7,6 +7,7 @@ let
     "authelia/storage_encryption_key"
     "authelia/oidc_hmac_secret"
     "authelia/jwks_private_key"
+    "authelia/smtp_password"
   ];
   oidcSecrets = [
     "nextcloud/oidc_client_id"
@@ -158,7 +159,12 @@ in
 
           storage.local.path = "/var/lib/authelia-main/db.sqlite3";
 
-          notifier.filesystem.filename = "/var/lib/authelia-main/notification.txt";
+          notifier.smtp = {
+            address = "smtp://mxe93e.netcup.net:465";
+            username = "noreply@moritzwm.de";
+            password = ''{{ secret "${config.sops.secrets."authelia/smtp_password".path}" }}'';
+            sender = "Authelia <noreply@moritzwm.de>";
+          };
 
           # OpenID Connect Provider for Nextcloud
           identity_providers.oidc = {

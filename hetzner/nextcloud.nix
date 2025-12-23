@@ -142,15 +142,9 @@ in
         # PHP settings for better performance
         phpOptions = {
           "opcache.enable" = "1";
-          "opcache.interned_strings_buffer" = "16";
-          "opcache.max_accelerated_files" = "10000";
-          "opcache.memory_consumption" = "128";
-          "opcache.save_comments" = "1";
-          "opcache.revalidate_freq" = "1";
-          "memory_limit" = "512M";
+          "opcache.interned_strings_buffer" = "32";
           "upload_max_filesize" = lib.mkForce "16G";
           "post_max_size" = lib.mkForce "16G";
-          "max_execution_time" = "300";
         };
       };
 

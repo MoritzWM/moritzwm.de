@@ -24,6 +24,7 @@
   services.openssh.enable = true;
   time.timeZone = "Europe/Berlin";
 
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   environment.systemPackages = map lib.lowPrio [
     pkgs.curl
     pkgs.gitMinimal

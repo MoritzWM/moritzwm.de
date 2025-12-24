@@ -179,6 +179,7 @@ in
                 client_secret = ''{{ secret "${config.sops.secrets."nextcloud/oidc_client_secret_hash".path}" }}'';
                 public = false;
                 authorization_policy = "two_factor";
+                consent_mode = "implicit";
                 require_pkce = true;
                 pkce_challenge_method = "S256";
                 redirect_uris = [ "https://hetzner.moritzwm.de/apps/user_oidc/code" ];
@@ -195,6 +196,7 @@ in
                 client_secret = ''{{ secret "${config.sops.secrets."immich/oidc_client_secret_hash".path}" }}'';
                 public = false;
                 authorization_policy = "two_factor";
+                consent_mode = "implicit";
                 require_pkce = true;
                 pkce_challenge_method = "S256";
                 redirect_uris = [

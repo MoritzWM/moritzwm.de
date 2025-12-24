@@ -139,7 +139,7 @@ in
             default_policy = "deny";
             rules = [
               { domain = "hetzner.moritzwm.de"; policy = "two_factor"; }
-              { domain = "photos.moritzwm.de"; policy = "two_factor"; }
+              { domain = "photos.moritzwm.de"; policy = "one_factor"; }
               { domain = "auth.moritzwm.de"; policy = "bypass"; }
             ];
           };
@@ -195,7 +195,7 @@ in
                 client_name = "Immich";
                 client_secret = ''{{ secret "${config.sops.secrets."immich/oidc_client_secret_hash".path}" }}'';
                 public = false;
-                authorization_policy = "two_factor";
+                authorization_policy = "one_factor";
                 consent_mode = "implicit";
                 require_pkce = true;
                 pkce_challenge_method = "S256";

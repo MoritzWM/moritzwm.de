@@ -47,6 +47,10 @@ in
         hostPath = "/var/lib/sops-nix/keys.txt";
         isReadOnly = true;
       };
+      "/var/lib/immich" = {
+        hostPath = "/mnt/storagebox/immich";
+        isReadOnly = false;
+      };
     };
 
     config = { config, pkgs, lib, ... }: {
@@ -60,8 +64,8 @@ in
         age.keyFile = "/var/lib/sops-nix/keys.txt";
 
         secrets = lib.genAttrs immichSecrets (name: {
-          owner = "immich";
-          group = "immich";
+          owner = "0";
+          group = "0";
           mode = "0400";
         });
       };
@@ -74,7 +78,7 @@ in
         enable = true;
         allowedTCPPorts = [ 2283 ];
       };
-
+      
       services.immich = {
         enable = true;
         host = "0.0.0.0";

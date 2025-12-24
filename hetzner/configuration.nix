@@ -1,10 +1,17 @@
 {
+  config,
   modulesPath,
   lib,
   pkgs,
   sops-nix,
   ...
 } @ args:
+let
+  hetznerSecrets = [
+    "hetzner/smb_user"
+    "hetzner/smb_pass"
+  ];
+in
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
@@ -45,15 +52,39 @@
         type = "ed25519";
     }
   ];
-  sops.defaultSopsFile = ./secrets.yaml;
-  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-  sops.age.keyFile = "/var/lib/sops-nix/keys.txt";
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    age.keyFile = "/var/lib/sops-nix/keys.txt";
+    secrets = lib.genAttrs hetznerSecrets (name: {
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    });
+    templates."storagebox_smbcredentials".content = ''
+      username=${config.sops.placeholder."hetzner/smb_user"}
+      password=${config.sops.placeholder."hetzner/smb_pass"}
+    '';
+  };
   users.users.root = {
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJqrx0JsGPUwEgiJqcXaPc4n7elVfq/mp4A9qIAOiXfg deck@steamdeck"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpKJNbeP/AReFpACmNIvfbpukdm2BwpnmOVszlxDVMj moritz@moritz-arch"
     ];
   };
+
+  fileSystems."/mnt/storagebox" = {
+      device = "//u523451-sub1.your-storagebox.de/u523451-sub1";
+      fsType = "cifs";
+      options = [
+        "credentials=${config.sops.templates."storagebox_smbcredentials".path}"
+        "uid=0"
+        "gid=0"
+        "file_mode=0755"
+        "dir_mode=0755"
+        "x-systemd.automount"
+      ];
+    };
+
   virtualisation.vmVariant = {
     virtualisation.sharedDirectories = {
       sops-key = {

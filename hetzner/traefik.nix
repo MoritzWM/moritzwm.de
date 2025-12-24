@@ -1,11 +1,6 @@
 { config, pkgs, lib, ... }:
 {
   networking.firewall.allowedTCPPorts = [ 80 443 ];
-  networking.nat = {
-    enable = true;
-    internalInterfaces = ["ve-+"];
-    externalInterface = "enp1s0";
-  };
 
   services.traefik = {
     enable = true;

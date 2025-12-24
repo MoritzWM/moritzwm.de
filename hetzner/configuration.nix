@@ -72,13 +72,13 @@ in
     ];
   };
 
-  fileSystems."/mnt/storagebox" = {
+  fileSystems."/mnt/storagebox_immich" = {
       device = "//u523451-sub1.your-storagebox.de/u523451-sub1";
       fsType = "cifs";
       options = [
         "credentials=${config.sops.templates."storagebox_smbcredentials".path}"
-        "uid=0"
-        "gid=0"
+        "uid=999"
+        "gid=999"
         "file_mode=0755"
         "dir_mode=0755"
         "x-systemd.automount"

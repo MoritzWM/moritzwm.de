@@ -48,7 +48,7 @@ in
         isReadOnly = true;
       };
       "/var/lib/immich" = {
-        hostPath = "/mnt/storagebox/immich";
+        hostPath = "/mnt/storagebox_immich";
         isReadOnly = false;
       };
     };

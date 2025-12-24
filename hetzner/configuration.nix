@@ -8,8 +8,10 @@
 } @ args:
 let
   hetznerSecrets = [
-    "hetzner/smb_user"
-    "hetzner/smb_pass"
+    "hetzner/immich_smb_user"
+    "hetzner/immich_smb_pass"
+    "hetzner/nextcloud_smb_user"
+    "hetzner/nextcloud_smb_pass"
   ];
 in
 {
@@ -60,9 +62,13 @@ in
       group = "root";
       mode = "0400";
     });
-    templates."storagebox_smbcredentials".content = ''
-      username=${config.sops.placeholder."hetzner/smb_user"}
-      password=${config.sops.placeholder."hetzner/smb_pass"}
+    templates."immich_storagebox_smbcredentials".content = ''
+      username=${config.sops.placeholder."hetzner/immich_smb_user"}
+      password=${config.sops.placeholder."hetzner/immich_smb_pass"}
+    '';
+    templates."nextcloud_storagebox_smbcredentials".content = ''
+      username=${config.sops.placeholder."hetzner/nextcloud_smb_user"}
+      password=${config.sops.placeholder."hetzner/nextcloud_smb_pass"}
     '';
   };
   users.users.root = {
@@ -72,18 +78,30 @@ in
     ];
   };
 
+  fileSystems."/mnt/storagebox_nextcloud" = {
+    device = "//u523451-sub2.your-storagebox.de/u523451-sub2";
+    fsType = "cifs";
+    options = [
+      "credentials=${config.sops.templates."nextcloud_storagebox_smbcredentials".path}"
+      "uid=999"
+      "gid=999"
+      "file_mode=0770"
+      "dir_mode=0770"
+      "x-systemd.automount"
+    ];
+  };
   fileSystems."/mnt/storagebox_immich" = {
-      device = "//u523451-sub1.your-storagebox.de/u523451-sub1";
-      fsType = "cifs";
-      options = [
-        "credentials=${config.sops.templates."storagebox_smbcredentials".path}"
-        "uid=999"
-        "gid=999"
-        "file_mode=0755"
-        "dir_mode=0755"
-        "x-systemd.automount"
-      ];
-    };
+    device = "//u523451-sub1.your-storagebox.de/u523451-sub1";
+    fsType = "cifs";
+    options = [
+      "credentials=${config.sops.templates."immich_storagebox_smbcredentials".path}"
+      "uid=999"
+      "gid=999"
+      "file_mode=0770"
+      "dir_mode=0770"
+      "x-systemd.automount"
+    ];
+  };
 
   virtualisation.vmVariant = {
     virtualisation.sharedDirectories = {

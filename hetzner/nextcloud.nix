@@ -68,12 +68,17 @@ in
         hostPath = "/var/lib/sops-nix/keys.txt";
         isReadOnly = true;
       };
+      "/var/lib/nextcloud/data" = {
+        hostPath = "/mnt/storagebox_nextcloud";
+        isReadOnly = false;
+      };
     };
 
     config = { config, pkgs, lib, ... }: {
       imports = [
         sops-nix.nixosModules.sops
       ];
+      systemd.tmpfiles.rules = [ "d /var/lib/nextcloud 700 nextcloud nextcloud -" ];
 
       # Configure sops-nix inside the container
       sops = {

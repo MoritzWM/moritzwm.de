@@ -25,8 +25,6 @@ in
             - websecure
           tls:
             certResolver: letsencrypt
-          middlewares:
-            - authelia
 
       services:
         immich:

@@ -14,6 +14,7 @@
     ./traefik.nix
     ./nextcloud.nix
     ./authelia.nix
+    ./immich.nix
   ];
   boot.loader.grub = {
     efiSupport = true;
@@ -33,7 +34,7 @@
   ];
   networking.nat = {
     enable = true;
-    internalInterfaces = [ "ve-authelia" "ve-nextcloud" ];
+    internalInterfaces = [ "ve-authelia" "ve-nextcloud" "ve-immich" ];
     externalInterface = "enp1s0";
   };
   system.stateVersion = "25.11";

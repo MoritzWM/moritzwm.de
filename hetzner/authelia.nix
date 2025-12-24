@@ -12,6 +12,8 @@ let
   oidcSecrets = [
     "nextcloud/oidc_client_id"
     "nextcloud/oidc_client_secret_hash"
+    "immich/oidc_client_id"
+    "immich/oidc_client_secret_hash"
   ];
 in
 {
@@ -137,6 +139,7 @@ in
             default_policy = "deny";
             rules = [
               { domain = "hetzner.moritzwm.de"; policy = "two_factor"; }
+              { domain = "photos.moritzwm.de"; policy = "two_factor"; }
               { domain = "auth.moritzwm.de"; policy = "bypass"; }
             ];
           };
@@ -167,24 +170,46 @@ in
             sender = "Authelia <noreply@moritzwm.de>";
           };
 
-          # OpenID Connect Provider for Nextcloud
+          # OpenID Connect Provider
           identity_providers.oidc = {
-            clients = [{
-              client_id = ''{{ secret "${config.sops.secrets."nextcloud/oidc_client_id".path}" }}'';
-              client_name = "Nextcloud";
-              client_secret = ''{{ secret "${config.sops.secrets."nextcloud/oidc_client_secret_hash".path}" }}'';
-              public = false;
-              authorization_policy = "two_factor";
-              require_pkce = true;
-              pkce_challenge_method = "S256";
-              redirect_uris = [ "https://hetzner.moritzwm.de/apps/user_oidc/code" ];
-              scopes = [ "openid" "profile" "email" "groups" ];
-              response_types = [ "code" ];
-              grant_types = [ "authorization_code" ];
-              access_token_signed_response_alg = "none";
-              userinfo_signed_response_alg = "none";
-              token_endpoint_auth_method = "client_secret_post";
-            }];
+            clients = [
+              {
+                client_id = ''{{ secret "${config.sops.secrets."nextcloud/oidc_client_id".path}" }}'';
+                client_name = "Nextcloud";
+                client_secret = ''{{ secret "${config.sops.secrets."nextcloud/oidc_client_secret_hash".path}" }}'';
+                public = false;
+                authorization_policy = "two_factor";
+                require_pkce = true;
+                pkce_challenge_method = "S256";
+                redirect_uris = [ "https://hetzner.moritzwm.de/apps/user_oidc/code" ];
+                scopes = [ "openid" "profile" "email" "groups" ];
+                response_types = [ "code" ];
+                grant_types = [ "authorization_code" ];
+                access_token_signed_response_alg = "none";
+                userinfo_signed_response_alg = "none";
+                token_endpoint_auth_method = "client_secret_post";
+              }
+              {
+                client_id = ''{{ secret "${config.sops.secrets."immich/oidc_client_id".path}" }}'';
+                client_name = "Immich";
+                client_secret = ''{{ secret "${config.sops.secrets."immich/oidc_client_secret_hash".path}" }}'';
+                public = false;
+                authorization_policy = "two_factor";
+                require_pkce = true;
+                pkce_challenge_method = "S256";
+                redirect_uris = [
+                  "https://photos.moritzwm.de/auth/login"
+                  "https://photos.moritzwm.de/user-settings"
+                  "app.immich:///oauth-callback"
+                ];
+                scopes = [ "openid" "profile" "email" ];
+                response_types = [ "code" ];
+                grant_types = [ "authorization_code" ];
+                access_token_signed_response_alg = "none";
+                userinfo_signed_response_alg = "none";
+                token_endpoint_auth_method = "client_secret_post";
+              }
+            ];
           };
         };
       };

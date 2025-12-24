@@ -58,7 +58,6 @@ in
               - Remote-Email
   '';
 
-  # NixOS container for Authelia
   containers.authelia = {
     autoStart = true;
     privateNetwork = true;
@@ -100,6 +99,8 @@ in
         enable = true;
         allowedTCPPorts = [ 9091 ];
       };
+      networking.useHostResolvConf = lib.mkForce false;
+      services.resolved.enable = true;
 
       services.authelia.instances.main = {
         enable = true;
@@ -160,7 +161,7 @@ in
           storage.local.path = "/var/lib/authelia-main/db.sqlite3";
 
           notifier.smtp = {
-            address = "smtp://mxe93e.netcup.net:465";
+            address = "submission://mxe93e.netcup.net:587";
             username = "noreply@moritzwm.de";
             password = ''{{ secret "${config.sops.secrets."authelia/smtp_password".path}" }}'';
             sender = "Authelia <noreply@moritzwm.de>";

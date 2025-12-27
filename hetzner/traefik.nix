@@ -17,6 +17,7 @@
         websecure = {
           address = ":443";
           http.tls.certResolver = "letsencrypt";
+          transport.respondingTimeouts.readTimeout = "0s";
         };
       };
 

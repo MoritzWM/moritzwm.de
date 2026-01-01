@@ -4,7 +4,7 @@
     virtualisation.oci-containers = {
         backend = "podman";
         containers.homeassistant = {
-            volumes = [ "home-assistant:/root/home-assistant-config" ];
+            volumes = [ "/home-assistant-config:/config" ];
             environment.TZ = "Europe/Berlin";
             image = "ghcr.io/home-assistant/home-assistant:stable";
             extraOptions = [ 

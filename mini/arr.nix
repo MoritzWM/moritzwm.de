@@ -7,9 +7,9 @@
     services.radarr = {
         enable = true;
         openFirewall = true;
-    }
+    };
     services.sabnzbd = {
         enable = true;
         openFirewall = true;
-    }
+    };
 }

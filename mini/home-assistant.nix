@@ -4,5 +4,5 @@
         enable = true;
         openFirewall = true;
         config.homeassistant.time_zone = "Europe/Berlin";
-    }
+    };
 }

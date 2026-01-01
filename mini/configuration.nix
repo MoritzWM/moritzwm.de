@@ -58,8 +58,7 @@
 		size = 16*1024; # 16 GB
 		}];
 
-	fileSystems.hub = {
-		mountPoint = "/hub";
+	fileSystems."/hub" = {
 		device = "UUID=b5aa426e-5840-4ccf-a303-250c65e23dd5";
 		fsType = "btrfs";
 		options = [

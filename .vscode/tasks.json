@@ -12,7 +12,7 @@
         {
             "label": "Mini VM",
             "type": "shell",
-            "command": "nix run nixpkgs#nixos-rebuild -- build-vm --flake .#mini; ./result/bin/run-mini-vm; rm mini.qcow2",
+            "command": "bash -c 'set -e; nix run nixpkgs#nixos-rebuild -- build-vm --flake .#mini; ./result/bin/run-mini-vm; rm mini.qcow2'",
             "problemMatcher": []
         }
     ]

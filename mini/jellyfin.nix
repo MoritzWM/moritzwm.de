@@ -1,6 +1,6 @@
 { config, pkgs, lib, sops-nix, ... }:
 {
-    users.groups.media.gid = 999;
+    users.groups.media.gid = 2000;
     services.jellyfin = {
         enable = true;
         openFirewall = true;

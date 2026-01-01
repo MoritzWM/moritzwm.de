@@ -12,6 +12,9 @@
 		(modulesPath + "/profiles/qemu-guest.nix")
 		sops-nix.nixosModules.sops
 		./disk-config.nix
+        ./arr.nix
+        ./jellyfin.nix
+        ./home-assistant.nix
 		# ./hardware-configuration.nix
 	];
 	boot.loader.grub = {

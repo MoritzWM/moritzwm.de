@@ -15,7 +15,7 @@
         ./arr.nix
         ./jellyfin.nix
         ./home-assistant.nix
-		# ./hardware-configuration.nix
+		./hardware-configuration.nix
 	];
 	boot.loader.grub = {
 		efiSupport = true;

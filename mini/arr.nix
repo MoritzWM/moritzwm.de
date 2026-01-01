@@ -10,9 +10,10 @@
         openFirewall = true;
         group = "media";
     };
+
+    networking.firewall.allowedTCPPorts = [ 8085 ];
     services.sabnzbd = {
         enable = true;
-        openFirewall = true;
         group = "media";
     };
 }

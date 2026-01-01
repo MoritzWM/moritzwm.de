@@ -3,7 +3,8 @@
 ## Initial installation with nixos-anywhere
 
 ```
-nix run github:nix-community/nixos-anywhere -- --flake ./#hetzner --target-host hetzner
+nix run github:nix-community/nixos-anywhere -- --flake .#name_of_flake --target-host name_of_host
+# optional: --generate-hardware-config nixos-generate-config ./hardware-configuration.nix
 ```
 
 `sops.age.generateKey = true` does not seem to work with auto-generated SSH host keys, see [this issue](https://github.com/Mic92/sops-nix/issues/167).

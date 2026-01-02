@@ -1,6 +1,6 @@
 { config, pkgs, lib, sops-nix, ... }:
-{
-    networking.firewall.allowedTCPPorts = [ 8123 ];
+{ 
+    networking.firewall.allowedTCPPorts = [ 1883 8123 ];
     virtualisation.oci-containers = {
         backend = "podman";
         containers.homeassistant = {
@@ -13,4 +13,14 @@
             ];
         };
 	};
+    sops.secrets."mqtt/homeassistant_pass" = {};
+    sops.secrets."mqtt/valetudo_pass" = {};
+    services.mosquitto = {
+        enable = true;
+        listeners = [{
+            port = 1883;
+            users.homeassistant.passwordFile = config.sops.secrets."mqtt/homeassistant_pass".path;
+            users.valetudo.passwordFile = config.sops.secrets."mqtt/valetudo_pass".path;
+        }];
+    };
 }

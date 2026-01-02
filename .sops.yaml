@@ -1,9 +1,15 @@
 keys:
   - &admin_moritz age1pqe876yhmjx7ppjg0j9ycm60l40kn0fdhvg5rv63yhxxflqwyf6qmrdajw
   - &server_hetzner age1aal0nrt6ascs9tw6z7qh93az0weh24y9m702th67ww3l5nqdc32st9u6cg
+  - &server_mini age14d8pf3wf6lk8ulu9x54wwymwl7vjnn06te3em6cp7etwkx6xdqrqwe0gsm
 creation_rules:
-  - path_regex: hetzner/[^/]+\.(yaml|json|env|ini)$
+  - path_regex: hetzner/secrets.yaml
     key_groups:
       - age:
           - *admin_moritz
           - *server_hetzner
+  - path_regex: mini/secrets.yaml
+    key_groups:
+      - age:
+          - *admin_moritz
+          - *server_mini

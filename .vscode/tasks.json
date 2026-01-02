@@ -2,11 +2,32 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "installTarget",
+            "type": "pickString",
+            "description": "Select installation target:",
+            "options": ["hetzner", "mini"],
+        }
+    ],
     "tasks": [
         {
-            "label": "Install on Hetzner",
+            "label": "Fresh install",
             "type": "shell",
-            "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#hetzner --target-host hetzner",
+            "command": "nix run github:nix-community/nixos-anywhere -- --flake .#${input:installTarget} --target-host ${input:installTarget} --generate-hardware-config nixos-generate-config ./${input:installTarget}/hardware-configuration.nix",
+            "problemMatcher": []
+
+        },
+        {
+            "label": "Rebuild flake",
+            "type": "shell",
+            "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#${input:installTarget} --target-host ${input:installTarget}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run flake in VM",
+            "type": "shell",
+            "command": "bash -c 'set -e; nix run nixpkgs#nixos-rebuild -- build-vm --flake .#${input:installTarget}; ./result/bin/run-${input:installTarget}-vm; rm ${input:installTarget}.qcow2'",
             "problemMatcher": []
         }
     ]

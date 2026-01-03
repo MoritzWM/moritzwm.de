@@ -24,6 +24,7 @@ in
     ./nextcloud.nix
     ./authelia.nix
     ./immich.nix
+    ./tandoor.nix
   ];
   boot.loader.grub = {
     efiSupport = true;

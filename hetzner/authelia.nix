@@ -14,6 +14,8 @@ let
     "nextcloud/oidc_client_secret_hash"
     "immich/oidc_client_id"
     "immich/oidc_client_secret_hash"
+    "tandoor/oidc_client_id"
+    "tandoor/oidc_client_secret_hash"
   ];
 in
 {
@@ -140,6 +142,7 @@ in
             rules = [
               { domain = "hetzner.moritzwm.de"; policy = "two_factor"; }
               { domain = "photos.moritzwm.de"; policy = "one_factor"; }
+              { domain = "rezepte.moritzwm.de"; policy = "one_factor"; }
               { domain = "auth.moritzwm.de"; policy = "bypass"; }
             ];
           };
@@ -210,6 +213,25 @@ in
                 access_token_signed_response_alg = "none";
                 userinfo_signed_response_alg = "none";
                 token_endpoint_auth_method = "client_secret_post";
+              }
+              {
+                client_id = ''{{ secret "${config.sops.secrets."tandoor/oidc_client_id".path}" }}'';
+                client_name = "Tandoor";
+                client_secret = ''{{ secret "${config.sops.secrets."tandoor/oidc_client_secret_hash".path}" }}'';
+                public = false;
+                authorization_policy = "one_factor";
+                consent_mode = "implicit";
+                require_pkce = false;
+                pkce_challenge_method = "";
+                redirect_uris = [
+                  "https://rezepte.moritzwm.de/accounts/oidc/authelia/login/callback/"
+                ];
+                scopes = [ "openid" "profile" "email" ];
+                response_types = [ "code" ];
+                grant_types = [ "authorization_code" ];
+                access_token_signed_response_alg = "none";
+                userinfo_signed_response_alg = "none";
+                token_endpoint_auth_method = "client_secret_basic";
               }
             ];
           };

@@ -18,9 +18,18 @@
     services.mosquitto = {
         enable = true;
         listeners = [{
-            port = 1883;
-            users.homeassistant.passwordFile = config.sops.secrets."mqtt/homeassistant_pass".path;
-            users.valetudo.passwordFile = config.sops.secrets."mqtt/valetudo_pass".path;
+            users.homeassistant = {
+                passwordFile = config.sops.secrets."mqtt/homeassistant_pass".path;
+                acl = [
+                    "readwrite #"
+                ];
+            };
+            users.valetudo = {
+                passwordFile = config.sops.secrets."mqtt/valetudo_pass".path;
+                acl = [
+                    "readwrite #"
+                ];
+            };
         }];
     };
 }

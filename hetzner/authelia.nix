@@ -106,6 +106,13 @@ in
       networking.useHostResolvConf = lib.mkForce false;
       services.resolved.enable = true;
 
+      # Redis for session storage
+      services.redis.servers.authelia = {
+        enable = true;
+        port = 6379;
+        bind = "127.0.0.1";
+      };
+
       services.authelia.instances.main = {
         enable = true;
         secrets = {
@@ -156,6 +163,10 @@ in
             expiration = "1h";
             inactivity = "5m";
             remember_me = "1M";
+            redis = {
+              host = "127.0.0.1";
+              port = 6379;
+            };
           };
 
           regulation = {

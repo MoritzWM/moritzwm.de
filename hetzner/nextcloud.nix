@@ -27,7 +27,6 @@ in
           tls:
             certResolver: letsencrypt
           middlewares:
-            - authelia
             - nextcloud-headers
             - nextcloud-redirectregex
 
@@ -138,6 +137,7 @@ in
           overwriteprotocol = "https";
           trusted_proxies = [ "10.233.1.1" ];
           default_phone_region = "DE";
+          social_login_auto_redirect = true;
           lost_password_link = "disabled";
           user_oidc = {
             default_token_endpoint_auth_method = "client_secret_post";

@@ -11,7 +11,7 @@ in
     http:
       routers:
         nextcloud-http:
-          rule: "Host(`hetzner.moritzwm.de`)"
+          rule: "Host(`cloud.moritzwm.de`)"
           service: nextcloud
           entryPoints:
             - web
@@ -20,7 +20,7 @@ in
             - https-redirect
 
         nextcloud-https:
-          rule: "Host(`hetzner.moritzwm.de`)"
+          rule: "Host(`cloud.moritzwm.de`)"
           service: nextcloud
           entryPoints:
             - websecure
@@ -117,7 +117,7 @@ in
       services.nextcloud = {
         enable = true;
         package = pkgs.nextcloud32;
-        hostName = "hetzner.moritzwm.de";
+        hostName = "cloud.moritzwm.de";
         
         extraAppsEnable = true;
         extraApps = {

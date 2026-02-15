@@ -147,7 +147,7 @@ in
           access_control = {
             default_policy = "deny";
             rules = [
-              { domain = "hetzner.moritzwm.de"; policy = "one_factor"; }
+              { domain = "cloud.moritzwm.de"; policy = "one_factor"; }
               { domain = "photos.moritzwm.de"; policy = "one_factor"; }
               { domain = "rezepte.moritzwm.de"; policy = "one_factor"; }
               { domain = "auth.moritzwm.de"; policy = "bypass"; }
@@ -196,7 +196,7 @@ in
                 consent_mode = "implicit";
                 require_pkce = true;
                 pkce_challenge_method = "S256";
-                redirect_uris = [ "https://hetzner.moritzwm.de/apps/user_oidc/code" ];
+                redirect_uris = [ "https://cloud.moritzwm.de/apps/user_oidc/code" ];
                 scopes = [ "openid" "profile" "email" "groups" ];
                 response_types = [ "code" ];
                 grant_types = [ "authorization_code" ];

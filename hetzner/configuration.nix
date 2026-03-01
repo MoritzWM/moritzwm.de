@@ -76,7 +76,12 @@ in
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJqrx0JsGPUwEgiJqcXaPc4n7elVfq/mp4A9qIAOiXfg deck@steamdeck"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpKJNbeP/AReFpACmNIvfbpukdm2BwpnmOVszlxDVMj moritz@moritz-arch"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAhPH7+iLuMsmmjAXBriSLe+0TB/jYjnza9eGFs8E7zJ root@mini"
     ];
+  };
+  services.openssh.settings = {
+    PasswordAuthentication = false;
+    KbdInteractiveAuthentication = false;
   };
 
   fileSystems."/mnt/storagebox_nextcloud" = {

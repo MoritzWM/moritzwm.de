@@ -16,6 +16,8 @@ let
     "immich/oidc_client_secret_hash"
     "tandoor/oidc_client_id"
     "tandoor/oidc_client_secret_hash"
+    "paperless/oidc_client_id"
+    "paperless/oidc_client_secret_hash"
   ];
 in
 {
@@ -150,6 +152,7 @@ in
               { domain = "cloud.moritzwm.de"; policy = "one_factor"; }
               { domain = "photos.moritzwm.de"; policy = "one_factor"; }
               { domain = "rezepte.moritzwm.de"; policy = "one_factor"; }
+              { domain = "paperless.moritzwm.de"; policy = "one_factor"; }
               { domain = "auth.moritzwm.de"; policy = "bypass"; }
             ];
           };
@@ -236,6 +239,25 @@ in
                 pkce_challenge_method = "";
                 redirect_uris = [
                   "https://rezepte.moritzwm.de/accounts/oidc/authelia/login/callback/"
+                ];
+                scopes = [ "openid" "profile" "email" ];
+                response_types = [ "code" ];
+                grant_types = [ "authorization_code" ];
+                access_token_signed_response_alg = "none";
+                userinfo_signed_response_alg = "none";
+                token_endpoint_auth_method = "client_secret_basic";
+              }
+              {
+                client_id = ''{{ secret "${config.sops.secrets."paperless/oidc_client_id".path}" }}'';
+                client_name = "Paperless";
+                client_secret = ''{{ secret "${config.sops.secrets."paperless/oidc_client_secret_hash".path}" }}'';
+                public = false;
+                authorization_policy = "one_factor";
+                consent_mode = "implicit";
+                require_pkce = true;
+                pkce_challenge_method = "S256";
+                redirect_uris = [
+                  "https://paperless.moritzwm.de/accounts/oidc/authelia/login/callback/"
                 ];
                 scopes = [ "openid" "profile" "email" ];
                 response_types = [ "code" ];

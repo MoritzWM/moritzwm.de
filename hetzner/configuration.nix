@@ -12,6 +12,8 @@ let
     "hetzner/immich_smb_pass"
     "hetzner/nextcloud_smb_user"
     "hetzner/nextcloud_smb_pass"
+    "hetzner/paperless_smb_user"
+    "hetzner/paperless_smb_pass"
   ];
 in
 {
@@ -25,6 +27,7 @@ in
     ./authelia.nix
     ./immich.nix
     ./tandoor.nix
+    ./paperless.nix
   ];
   boot.loader.grub = {
     efiSupport = true;
@@ -44,7 +47,7 @@ in
   ];
   networking.nat = {
     enable = true;
-    internalInterfaces = [ "ve-authelia" "ve-nextcloud" "ve-immich" ];
+    internalInterfaces = [ "ve-authelia" "ve-nextcloud" "ve-immich" "ve-paperless" ];
     externalInterface = "enp1s0";
   };
   system.stateVersion = "25.11";
@@ -66,6 +69,10 @@ in
     templates."immich_storagebox_smbcredentials".content = ''
       username=${config.sops.placeholder."hetzner/immich_smb_user"}
       password=${config.sops.placeholder."hetzner/immich_smb_pass"}
+    '';
+    templates."paperless_storagebox_smbcredentials".content = ''
+      username=${config.sops.placeholder."hetzner/paperless_smb_user"}
+      password=${config.sops.placeholder."hetzner/paperless_smb_pass"}
     '';
     templates."nextcloud_storagebox_smbcredentials".content = ''
       username=${config.sops.placeholder."hetzner/nextcloud_smb_user"}
@@ -101,6 +108,18 @@ in
     fsType = "cifs";
     options = [
       "credentials=${config.sops.templates."immich_storagebox_smbcredentials".path}"
+      "uid=999"
+      "gid=999"
+      "file_mode=0770"
+      "dir_mode=0770"
+      "x-systemd.automount"
+    ];
+  };
+  fileSystems."/mnt/storagebox_paperless" = {
+    device = "//u523451-sub3.your-storagebox.de/u523451-sub3";
+    fsType = "cifs";
+    options = [
+      "credentials=${config.sops.templates."paperless_storagebox_smbcredentials".path}"
       "uid=999"
       "gid=999"
       "file_mode=0770"

@@ -1,0 +1,26 @@
+[
+  // {
+  // "label": "Fresh install: hetzner",
+  // "command": "nix run github:nix-community/nixos-anywhere -- --flake .#hetzner --target-host hetzner --generate-hardware-config nixos-generate-config ./hetzner/hardware-configuration.nix"
+  // },
+  // {
+  // "label": "Fresh install: mini",
+  // "command": "nix run github:nix-community/nixos-anywhere -- --flake .#mini --target-host mini --generate-hardware-config nixos-generate-config ./mini/hardware-configuration.nix"
+  // },
+  {
+    "label": "Rebuild flake: hetzner",
+    "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#hetzner --target-host hetzner",
+  },
+  {
+    "label": "Rebuild flake: mini",
+    "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#mini --target-host mini",
+  },
+  {
+    "label": "Run flake in VM: hetzner",
+    "command": "bash -c 'set -e; nix run nixpkgs#nixos-rebuild -- build-vm --flake .#hetzner; ./result/bin/run-hetzner-vm; rm hetzner.qcow2'",
+  },
+  {
+    "label": "Run flake in VM: mini",
+    "command": "bash -c 'set -e; nix run nixpkgs#nixos-rebuild -- build-vm --flake .#mini; ./result/bin/run-mini-vm; rm mini.qcow2'",
+  },
+]

@@ -1,9 +1,12 @@
 { config, pkgs, lib, sops-nix, ... }:
 let
+  preConsumeScript = pkgs.writeScript "paperless-pre-consume" (builtins.readFile ./pre_consume.py);
+
   paperlessSecrets = [
     "paperless/admin_pass"
     "paperless/oidc_client_id"
     "paperless/oidc_client_secret"
+    "paperless/pdf_passwords"
   ];
 in
 {
@@ -93,6 +96,7 @@ in
           PAPERLESS_SOCIAL_AUTO_SIGNUP = "true";
           PAPERLESS_REDIRECT_LOGIN_TO_SSO = "true";
           PAPERLESS_OCR_LANGUAGE = "deu+eng";
+          PAPERLESS_PRE_CONSUME_SCRIPT = "${preConsumeScript}";
         };
       };
 

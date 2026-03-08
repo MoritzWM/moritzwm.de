@@ -68,14 +68,6 @@ in
           group = "paperless";
           mode = "0400";
         });
-
-        templates."paperless_oidc" = {
-          owner = "paperless";
-          group = "paperless";
-          content = ''
-            PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"${config.sops.placeholder."paperless/oidc_client_id"}","secret":"${config.sops.placeholder."paperless/oidc_client_secret"}","settings":{"server_url":"https://auth.moritzwm.de/.well-known/openid-configuration","token_auth_method":"client_secret_basic"}}]}}
-          '';
-        };
       };
 
       system.stateVersion = "25.11";
@@ -92,7 +84,7 @@ in
         address = "0.0.0.0";
         port = 28981;
         passwordFile = config.sops.secrets."paperless/admin_pass".path;
-        environmentFile = config.sops.templates."paperless_oidc".path;
+        environmentFile = "/run/paperless-oidc.env";
         database.createLocally = true;
 
         settings = {
@@ -107,6 +99,24 @@ in
       services.postgresqlBackup = {
         enable = true;
         databases = [ "paperless" ];
+      };
+
+      # Write OIDC env file from individual sops secrets at boot
+      systemd.services.paperless-init-oidc-env = {
+        wantedBy = [ "paperless-scheduler.service" "paperless-consumer.service" "paperless-web.service" ];
+        before = [ "paperless-scheduler.service" "paperless-consumer.service" "paperless-web.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = ''
+          client_id=$(cat ${config.sops.secrets."paperless/oidc_client_id".path})
+          client_secret=$(cat ${config.sops.secrets."paperless/oidc_client_secret".path})
+          printf 'PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"%s","secret":"%s","settings":{"server_url":"https://auth.moritzwm.de/.well-known/openid-configuration","token_auth_method":"client_secret_basic"}}]}}\n' \
+            "$client_id" "$client_secret" > /run/paperless-oidc.env
+          chown paperless:paperless /run/paperless-oidc.env
+          chmod 400 /run/paperless-oidc.env
+        '';
       };
     };
   };

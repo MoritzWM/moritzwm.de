@@ -9,7 +9,7 @@
   // },
   {
     "label": "Rebuild flake: hetzner",
-    "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#hetzner --target-host hetzner",
+    "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#hetzner --target-host hetzner --build-host hetzner",
   },
   {
     "label": "Rebuild flake: mini",

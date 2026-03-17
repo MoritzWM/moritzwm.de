@@ -35,6 +35,7 @@
 		pkgs.vim
 		pkgs.jellyfin-mpv-shim
 		pkgs.bluez
+		pkgs.pavucontrol
 	];
 	system.stateVersion = "25.11";
 
@@ -43,20 +44,22 @@
 		enable = true;
 		alsa.enable = true;
 		pulse.enable = true;
-	};
+  };
 
 	# Bluetooth
 	hardware.bluetooth.enable = true;
 
 	# Minimal desktop for jellyfin-mpv-shim
 	services.xserver.enable = true;
-	services.desktopManager.gnome.enable = true;
-	services.gnome.core-utilities.enable = false;
+	services.xserver.windowManager.openbox.enable = true;
+	# services.desktopManager.gnome.enable = true;
+	# services.gnome.core-apps.enable = false;
 	services.displayManager.autoLogin = {
 		enable = true;
 		user = "media";
 	};
-	services.displayManager.defaultSession = "gnome";
+	# services.displayManager.defaultSession = "gnome";
+	services.displayManager.defaultSession = "none+openbox";
 	users.users.media = {
 		isNormalUser = true;
 		extraGroups = [ "video" "audio" ];

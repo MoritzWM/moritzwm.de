@@ -13,7 +13,7 @@
   },
   {
     "label": "Rebuild flake: mini",
-    "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#mini --target-host mini",
+    "command": "nix run nixpkgs#nixos-rebuild -- switch --flake ./#mini --target-host mini --build-host mini",
   },
   {
     "label": "Run flake in VM: hetzner",

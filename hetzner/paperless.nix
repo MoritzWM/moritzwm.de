@@ -1,14 +1,6 @@
 { config, pkgs, lib, ... }:
 let
   preConsumeScript = pkgs.writeScript "paperless-pre-consume" (builtins.readFile ./pre_consume.py);
-
-  paperlessSecrets = [
-    "paperless/admin_pass"
-    "paperless/oidc_client_id"
-    "paperless/oidc_client_secret"
-    "paperless/secret_key"
-    "paperless/pdf_passwords"
-  ];
 in
 {
   environment.etc."traefik/dynamic/paperless.yml".text = ''
@@ -38,15 +30,34 @@ in
             passHostHeader: true
   '';
   sops = {
-      secrets = lib.genAttrs paperlessSecrets (name: {
-        owner = "root";
-        group = "root";
-        mode = "0400";
-      });
-      templates."paperless.env".content = ''
+    secrets."paperless/admin_pass" = {
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    secrets."paperless/oidc_client_id" = {
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    secrets."paperless/oidc_client_secret" = {
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    secrets."paperless/secret_key" = {
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
+    secrets."paperless/pdf_passwords" = {
+      uid = 999;
+      gid = 999;
+      mode = "0400";
+    };
+    templates."paperless.env".content = ''
         PAPERLESS_ADMIN_PASSWORD=${config.sops.placeholder."paperless/admin_pass"}
         PAPERLESS_SECRET_KEY=${config.sops.placeholder."paperless/secret_key"}
-        PAPERLESS_PDF_PASSWORDS=${config.sops.placeholder."paperless/pdf_passwords"}
         PAPERLESS_SOCIALACCOUNT_PROVIDERS={"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"${config.sops.placeholder."paperless/oidc_client_id"}","secret":"${config.sops.placeholder."paperless/oidc_client_secret"}","settings":{"server_url":"https://auth.moritzwm.de/.well-known/openid-configuration","token_auth_method":"client_secret_basic"}}]}}
   '';
   };
@@ -112,6 +123,7 @@ in
           "/var/lib/paperless/consume:/usr/src/paperless/consume"
           "/var/lib/paperless/export:/usr/src/paperless/export"
           "${preConsumeScript}:/usr/src/paperless/scripts/pre-consume.py:ro"
+          "${config.sops.secrets."paperless/pdf_passwords".path}:${config.sops.secrets."paperless/pdf_passwords".path}:ro"
         ];
         environment = {
           USERMAP_UID = "999";

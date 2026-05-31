@@ -26,6 +26,12 @@
 	time.timeZone = "Europe/Berlin";
 
 	nix.settings.experimental-features = [ "nix-command" "flakes" ];
+	nix.settings.auto-optimise-store = true;
+	nix.gc = {
+		automatic = true;
+		dates = "weekly";
+		options = "--delete-older-than 14d";
+	};
     nixpkgs.config.allowUnfree = true;
 	environment.systemPackages = map lib.lowPrio [
 		pkgs.curl
@@ -38,6 +44,14 @@
 		pkgs.pavucontrol
 	];
 	system.stateVersion = "25.11";
+	system.autoUpgrade = {
+		enable = true;
+		flake = "github:moritzwm/moritzwm.de#mini";
+		flags = [ "-L" "--refresh" ];
+		dates = "04:00";
+		operation = "switch";
+		allowReboot = true;
+	};
 
 	# Audio
 	services.pipewire = {

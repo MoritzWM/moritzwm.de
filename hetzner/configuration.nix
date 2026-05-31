@@ -39,6 +39,12 @@ in
   time.timeZone = "Europe/Berlin";
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.auto-optimise-store = true;
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
+  };
   environment.systemPackages = map lib.lowPrio [
     pkgs.curl
     pkgs.gitMinimal
@@ -51,6 +57,14 @@ in
     externalInterface = "enp1s0";
   };
   system.stateVersion = "25.11";
+  system.autoUpgrade = {
+    enable = true;
+    flake = "github:moritzwm/moritzwm.de#hetzner";
+    flags = [ "-L" "--refresh" ];
+    dates = "04:00";
+    operation = "switch";
+    allowReboot = true;
+  };
   zramSwap.enable = true;
   services.openssh.hostKeys = [
     {

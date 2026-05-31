@@ -125,7 +125,7 @@ in
 
         extraAppsEnable = true;
         extraApps = {
-            inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks user_oidc;
+            inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks user_oidc deck;
         };
 
         config = {

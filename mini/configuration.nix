@@ -47,7 +47,7 @@
 	system.autoUpgrade = {
 		enable = true;
 		flake = "github:moritzwm/moritzwm.de#mini";
-		flags = [ "-L" "--refresh" ];
+		flags = [ "-L" "--refresh" "--no-write-lock-file" ];
 		dates = "04:00";
 		operation = "switch";
 		allowReboot = true;

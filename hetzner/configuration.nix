@@ -60,7 +60,7 @@ in
   system.autoUpgrade = {
     enable = true;
     flake = "github:moritzwm/moritzwm.de#hetzner";
-    flags = [ "-L" "--refresh" ];
+    flags = [ "-L" "--refresh" "--no-write-lock-file" ];
     dates = "04:00";
     operation = "switch";
     allowReboot = true;

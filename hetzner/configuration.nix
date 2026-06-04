@@ -59,8 +59,8 @@ in
   system.stateVersion = "25.11";
   system.autoUpgrade = {
     enable = true;
-    flake = "github:moritzwm/moritzwm.de#hetzner";
-    flags = [ "-L" "--refresh" "--no-write-lock-file" ];
+    flake = "/var/lib/nixos-config#hetzner";
+    flags = [ "--print-build-logs"  "--commit-lock-file" ];
     dates = "04:00";
     operation = "switch";
     allowReboot = true;

@@ -45,13 +45,13 @@
 	];
 	system.stateVersion = "25.11";
 	system.autoUpgrade = {
-		enable = true;
-		flake = "github:moritzwm/moritzwm.de#mini";
-		flags = [ "-L" "--refresh" "--no-write-lock-file" ];
-		dates = "04:00";
-		operation = "switch";
-		allowReboot = true;
-	};
+    enable = true;
+    flake = "/var/lib/nixos-config#mini";
+    flags = [ "--print-build-logs" ];
+    dates = "05:00";
+    operation = "switch";
+    allowReboot = true;
+  };
 
 	# Audio
 	services.pipewire = {

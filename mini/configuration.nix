@@ -22,6 +22,8 @@
 		efiInstallAsRemovable = true;
 	};
 	networking.hostName = "mini";
+	networking.firewall.allowedTCPPorts = [ 111 2049 20048 5201];
+	networking.firewall.allowedUDPPorts = [ 111 2049 20048 ];
 	services.openssh.enable = true;
 	time.timeZone = "Europe/Berlin";
 
@@ -95,10 +97,19 @@
 		defaultSopsFile = ./secrets.yaml;
 		age.keyFile = "/var/lib/sops-nix/keys.txt";
 	};
+
+	services.nfs.server = {
+		enable = true;
+		exports = ''
+			/export 192.168.178.0/24(rw,fsid=0,insecure,no_root_squash,no_subtree_check)
+			/export/Photos 192.168.178.0/24(rw,nohide,insecure,no_root_squash,no_subtree_check)
+		'';
+	};
+
 	users.users.root = {
 		openssh.authorizedKeys.keys = [
-			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJqrx0JsGPUwEgiJqcXaPc4n7elVfq/mp4A9qIAOiXfg deck@steamdeck"
 			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpKJNbeP/AReFpACmNIvfbpukdm2BwpnmOVszlxDVMj moritz@moritz-arch"
+			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILUI69bmgKa3TJC9tCTeB60X3dy4xgl3d5s7Ag3+0wq6 moritz@htpc"
 		];
 	};
 
@@ -116,6 +127,12 @@
 			"nofail"
 			"compress=zstd"
 		];
+	};
+
+	fileSystems."/export/Photos" = {
+		device = "/hub/Photos";
+		fsType = "none";
+		options = [ "bind" ];
 	};
 
 	virtualisation.vmVariant = {

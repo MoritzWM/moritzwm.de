@@ -1,12 +1,40 @@
-{ config, pkgs, lib, sops-nix, ... }:
+{ config, pkgs, lib, ... }:
 let
-  immichSecrets = [
-    "immich/oidc_client_id"
-    "immich/oidc_client_secret"
-  ];
+  # Pin the Immich release. Bump this to upgrade (see https://github.com/immich-app/immich/releases).
+  immichVersion = "v3.0.1";
+
+  # PostgreSQL image. We use the PG17 VectorChord variant (NOT the guide's default PG14
+  # image) because the previous native NixOS install ran PostgreSQL 17 — this keeps the
+  # major version identical so a logical pg_dump/restore is a clean same-version restore
+  # instead of an unsupported downgrade. Immich supports PG14-17.
+  postgresImage = "ghcr.io/immich-app/postgres:17-vectorchord0.4.3";
+  redisImage = "docker.io/valkey/valkey:9";
+
+  # Media (photos/videos/thumbs/encoded-video/profile). Same Storage Box path the native
+  # install used as `mediaLocation`, mounted to /data inside the container.
+  mediaLocation = "/mnt/storagebox_immich";
+
+  # Database data dir. MUST be on local disk — network shares are unsupported for Postgres.
+  dbDataLocation = "/var/lib/immich-postgres";
+
+  dbUser = "immich"; # matches the role that owns the objects in the dump
+  dbName = "immich";
 in
 {
-  # Traefik dynamic configuration for Immich
+  # sops secret holding the internal Postgres password (add `immich/db_password` to
+  # hetzner/secrets.yaml). Rendered into an env file consumed by both containers.
+  sops.secrets."immich/db_password" = {
+    owner = "root";
+    group = "root";
+    mode = "0400";
+  };
+
+  sops.templates."immich_db_env".content = ''
+    DB_PASSWORD=${config.sops.placeholder."immich/db_password"}
+    POSTGRES_PASSWORD=${config.sops.placeholder."immich/db_password"}
+  '';
+
+  # Traefik now targets the Docker-published port on the host loopback.
   environment.etc."traefik/dynamic/immich.yml".text = ''
     http:
       routers:
@@ -30,76 +58,100 @@ in
         immich:
           loadBalancer:
             servers:
-              - url: "http://10.233.3.2:2283"
+              - url: "http://127.0.0.1:2283"
             passHostHeader: true
   '';
 
-  # NixOS container for Immich
-  containers.immich = {
-    autoStart = true;
-    privateNetwork = true;
-    hostAddress = "10.233.3.1";
-    localAddress = "10.233.3.2";
+  virtualisation.podman = {
+    enable = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
 
-    # Bind mount the age key so sops-nix can decrypt secrets inside the container
-    bindMounts = {
-      "/var/lib/sops-nix/keys.txt" = {
-        hostPath = "/var/lib/sops-nix/keys.txt";
-        isReadOnly = true;
-      };
-      "/var/lib/immich" = {
-        hostPath = "/mnt/storagebox_immich";
-        isReadOnly = false;
-      };
+  # Local storage for the Postgres data directory.
+  systemd.tmpfiles.rules = [
+    "d ${dbDataLocation} 0700 root root - -"
+  ];
+
+  # Named podman network so the containers can resolve each other by name.
+  systemd.services.podman-network-immich = {
+    wantedBy = [
+      "podman-immich-server.service"
+      "podman-immich-machine-learning.service"
+      "podman-immich-redis.service"
+      "podman-immich-postgres.service"
+    ];
+    before = [
+      "podman-immich-server.service"
+      "podman-immich-machine-learning.service"
+      "podman-immich-redis.service"
+      "podman-immich-postgres.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
     };
+    script = ''
+      ${pkgs.podman}/bin/podman network exists immich || \
+        ${pkgs.podman}/bin/podman network create immich
+    '';
+  };
 
-    config = { config, pkgs, lib, ... }: {
-      imports = [
-        sops-nix.nixosModules.sops
-      ];
-
-      # Configure sops-nix inside the container
-      sops = {
-        defaultSopsFile = ./secrets.yaml;
-        age.keyFile = "/var/lib/sops-nix/keys.txt";
-
-        secrets = lib.genAttrs immichSecrets (name: {
-          owner = "0";
-          group = "0";
-          mode = "0400";
-        });
-      };
-
-      system.stateVersion = "25.11";
-      networking.useHostResolvConf = lib.mkForce false;
-      services.resolved.enable = true;
-
-      networking.firewall = {
-        enable = true;
-        allowedTCPPorts = [ 2283 ];
-      };
-      
-      services.immich = {
-        enable = true;
-        host = "0.0.0.0";
-        port = 2283;
-        openFirewall = true;
-
-        mediaLocation = "/var/lib/immich";
-
+  virtualisation.oci-containers = {
+    backend = "podman";
+    containers = {
+      immich-server = {
+        image = "ghcr.io/immich-app/immich-server:${immichVersion}";
+        autoStart = true;
+        # Publish only on loopback; Traefik terminates TLS and proxies here.
+        ports = [ "127.0.0.1:2283:2283" ];
+        volumes = [
+          "${mediaLocation}:/data"
+          "/etc/localtime:/etc/localtime:ro"
+        ];
         environment = {
+          DB_HOSTNAME = "immich-postgres";
+          DB_USERNAME = dbUser;
+          DB_DATABASE_NAME = dbName;
+          DB_VECTOR_EXTENSION = "vectorchord";
+          REDIS_HOSTNAME = "immich-redis";
+          TZ = "Europe/Berlin";
           IMMICH_LOG_LEVEL = "log";
         };
-
-        machine-learning.enable = true;
+        environmentFiles = [ config.sops.templates."immich_db_env".path ];
+        dependsOn = [ "immich-postgres" "immich-redis" ];
+        extraOptions = [ "--network=immich" ];
       };
 
-      # PostgreSQL is automatically configured by the Immich module
-      # Redis is automatically configured by the Immich module
+      immich-machine-learning = {
+        image = "ghcr.io/immich-app/immich-machine-learning:${immichVersion}";
+        autoStart = true;
+        volumes = [ "immich-model-cache:/cache" ];
+        environment = {
+          TZ = "Europe/Berlin";
+        };
+        extraOptions = [ "--network=immich" ];
+      };
 
-      services.postgresqlBackup = {
-        enable = true;
-        databases = [ "immich" ];
+      immich-redis = {
+        image = redisImage;
+        autoStart = true;
+        extraOptions = [ "--network=immich" ];
+      };
+
+      immich-postgres = {
+        image = postgresImage;
+        autoStart = true;
+        environment = {
+          POSTGRES_USER = dbUser;
+          POSTGRES_DB = dbName;
+          POSTGRES_INITDB_ARGS = "--data-checksums";
+        };
+        environmentFiles = [ config.sops.templates."immich_db_env".path ];
+        volumes = [ "${dbDataLocation}:/var/lib/postgresql/data" ];
+        extraOptions = [
+          "--network=immich"
+          "--shm-size=128m"
+        ];
       };
     };
   };

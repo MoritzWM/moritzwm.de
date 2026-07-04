@@ -53,7 +53,7 @@ in
   ];
   networking.nat = {
     enable = true;
-    internalInterfaces = [ "ve-authelia" "ve-nextcloud" "ve-immich" ];
+    internalInterfaces = [ "ve-authelia" "ve-nextcloud" ];
     externalInterface = "enp1s0";
   };
   system.stateVersion = "25.11";

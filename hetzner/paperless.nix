@@ -94,17 +94,35 @@ in
     "d /var/lib/paperless/export 0755 root root -"
   ];
 
+  # The paperless Postgres data lives in a local podman volume, so back it up with a
+  # logical dump onto the Storage Box (which is where the media already lives).
+  systemd.services.paperless-db-backup = {
+    description = "Dump the paperless database to the Storage Box";
+    startAt = "daily";
+    after = [ "podman-paperless-db.service" ];
+    unitConfig.RequiresMountsFor = "/mnt/storagebox_paperless";
+    path = [ pkgs.podman pkgs.gzip ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      podman exec paperless-db pg_dump --clean --if-exists -U paperless paperless \
+        | gzip > /mnt/storagebox_paperless/db-backup.sql.gz
+    '';
+  };
+
+  # Don't start the webserver until its media share is mounted.
+  systemd.services.podman-paperless-webserver.unitConfig.RequiresMountsFor = "/mnt/storagebox_paperless";
+
   virtualisation.oci-containers = {
     backend = "podman";
     containers = {
       paperless-broker = {
-        image = "docker.io/library/redis:8";
+        image = "docker.io/library/redis:8.8.0";
         volumes = [ "paperless-redisdata:/data" ];
         extraOptions = [ "--network=paperless" ];
       };
 
       paperless-db = {
-        image = "docker.io/library/postgres:18";
+        image = "docker.io/library/postgres:18.4";
         volumes = [ "paperless-pgdata:/var/lib/postgresql" ];
         environment = {
           POSTGRES_DB = "paperless";
@@ -115,7 +133,7 @@ in
       };
 
       paperless-webserver = {
-        image = "ghcr.io/paperless-ngx/paperless-ngx:latest";
+        image = "ghcr.io/paperless-ngx/paperless-ngx:2.20.15";
         ports = [ "127.0.0.1:28981:8000" ];
         volumes = [
           "paperless-data:/usr/src/paperless/data"

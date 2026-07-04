@@ -8,7 +8,7 @@ let
   # major version identical so a logical pg_dump/restore is a clean same-version restore
   # instead of an unsupported downgrade. Immich supports PG14-17.
   postgresImage = "ghcr.io/immich-app/postgres:17-vectorchord0.4.3";
-  redisImage = "docker.io/valkey/valkey:9";
+  redisImage = "docker.io/valkey/valkey:9.1.0";
 
   # Media (photos/videos/thumbs/encoded-video/profile). Same Storage Box path the native
   # install used as `mediaLocation`, mounted to /data inside the container.
@@ -65,12 +65,22 @@ in
   virtualisation.podman = {
     enable = true;
     defaultNetwork.settings.dns_enabled = true;
+    # oci-containers pulls new images on tag bumps but never removes the old ones;
+    # prune unused images/containers weekly so /var/lib/containers doesn't grow forever.
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
+      flags = [ "--all" ];
+    };
   };
 
   # Local storage for the Postgres data directory.
   systemd.tmpfiles.rules = [
     "d ${dbDataLocation} 0700 root root - -"
   ];
+
+  # The media lives on the CIFS Storage Box; don't start the server until it's mounted.
+  systemd.services.podman-immich-server.unitConfig.RequiresMountsFor = "/mnt/storagebox_immich";
 
   # Named podman network so the containers can resolve each other by name.
   systemd.services.podman-network-immich = {

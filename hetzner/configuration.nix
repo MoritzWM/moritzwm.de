@@ -26,7 +26,7 @@ in
     ./nextcloud.nix
     ./authelia.nix
     ./immich.nix
-    # ./tandoor.nix
+    ./mealie.nix
     ./paperless.nix
   ];
   boot.loader.grub = {

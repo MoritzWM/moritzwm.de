@@ -14,10 +14,10 @@ let
     "nextcloud/oidc_client_secret_hash"
     "immich/oidc_client_id"
     "immich/oidc_client_secret_hash"
-    "tandoor/oidc_client_id"
-    "tandoor/oidc_client_secret_hash"
     "paperless/oidc_client_id"
     "paperless/oidc_client_secret_hash"
+    "mealie/oidc_client_id"
+    "mealie/oidc_client_secret_hash"
   ];
 in
 {
@@ -229,25 +229,6 @@ in
                 token_endpoint_auth_method = "client_secret_post";
               }
               {
-                client_id = ''{{ secret "${config.sops.secrets."tandoor/oidc_client_id".path}" }}'';
-                client_name = "Tandoor";
-                client_secret = ''{{ secret "${config.sops.secrets."tandoor/oidc_client_secret_hash".path}" }}'';
-                public = false;
-                authorization_policy = "one_factor";
-                consent_mode = "implicit";
-                require_pkce = false;
-                pkce_challenge_method = "";
-                redirect_uris = [
-                  "https://rezepte.moritzwm.de/accounts/oidc/authelia/login/callback/"
-                ];
-                scopes = [ "openid" "profile" "email" ];
-                response_types = [ "code" ];
-                grant_types = [ "authorization_code" ];
-                access_token_signed_response_alg = "none";
-                userinfo_signed_response_alg = "none";
-                token_endpoint_auth_method = "client_secret_basic";
-              }
-              {
                 client_id = ''{{ secret "${config.sops.secrets."paperless/oidc_client_id".path}" }}'';
                 client_name = "Paperless";
                 client_secret = ''{{ secret "${config.sops.secrets."paperless/oidc_client_secret_hash".path}" }}'';
@@ -260,6 +241,26 @@ in
                   "https://paperless.moritzwm.de/accounts/oidc/authelia/login/callback/"
                 ];
                 scopes = [ "openid" "profile" "email" ];
+                response_types = [ "code" ];
+                grant_types = [ "authorization_code" ];
+                access_token_signed_response_alg = "none";
+                userinfo_signed_response_alg = "none";
+                token_endpoint_auth_method = "client_secret_basic";
+              }
+              {
+                client_id = ''{{ secret "${config.sops.secrets."mealie/oidc_client_id".path}" }}'';
+                client_name = "Mealie";
+                client_secret = ''{{ secret "${config.sops.secrets."mealie/oidc_client_secret_hash".path}" }}'';
+                public = false;
+                authorization_policy = "one_factor";
+                consent_mode = "implicit";
+                require_pkce = true;
+                pkce_challenge_method = "S256";
+                redirect_uris = [
+                  "https://rezepte.moritzwm.de/login"
+                  "https://rezepte.moritzwm.de/login?direct=1"
+                ];
+                scopes = [ "openid" "profile" "email" "groups" ];
                 response_types = [ "code" ];
                 grant_types = [ "authorization_code" ];
                 access_token_signed_response_alg = "none";

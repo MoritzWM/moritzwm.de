@@ -75,6 +75,7 @@ in
           OIDC_GROUPS_CLAIM = "groups";
           OIDC_USER_GROUP = "users";
           OIDC_ADMIN_GROUP = "admins";
+          OPENAI_ENABLE_IMAGE_SERVICES = "true";
         };
         environmentFiles = [ config.sops.templates."mealie_oidc_env".path ];
       };

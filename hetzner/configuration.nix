@@ -28,6 +28,7 @@ in
     ./immich.nix
     ./mealie.nix
     ./paperless.nix
+    ./actual.nix
   ];
   boot.loader.grub = {
     efiSupport = true;

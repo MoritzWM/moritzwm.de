@@ -101,8 +101,8 @@
 	services.nfs.server = {
 		enable = true;
 		exports = ''
-			/export 192.168.178.0/24(rw,fsid=0,insecure,no_root_squash,no_subtree_check)
-			/export/Photos 192.168.178.0/24(rw,nohide,insecure,no_root_squash,no_subtree_check)
+			/export 192.168.178.0/24(rw,fsid=0,insecure,no_root_squash,no_subtree_check,async)
+			/export/Photos 192.168.178.0/24(rw,nohide,insecure,no_root_squash,no_subtree_check,async)
 		'';
 	};
 

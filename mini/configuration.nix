@@ -55,37 +55,6 @@
     allowReboot = true;
   };
 
-	# Audio
-	services.pipewire = {
-		enable = true;
-		alsa.enable = true;
-		pulse.enable = true;
-  };
-
-	# Bluetooth
-	hardware.bluetooth.enable = true;
-
-	# Minimal desktop for jellyfin-mpv-shim
-	services.xserver.enable = true;
-	services.xserver.windowManager.openbox.enable = true;
-	# services.desktopManager.gnome.enable = true;
-	# services.gnome.core-apps.enable = false;
-	services.displayManager.autoLogin = {
-		enable = true;
-		user = "media";
-	};
-	# services.displayManager.defaultSession = "gnome";
-	services.displayManager.defaultSession = "none+openbox";
-	users.users.media = {
-		isNormalUser = true;
-		extraGroups = [ "video" "audio" ];
-	};
-	environment.etc."xdg/autostart/jellyfin-mpv-shim.desktop".text = ''
-		[Desktop Entry]
-		Name=Jellyfin MPV Shim
-		Exec=sh -c 'sleep 30; jellyfin-mpv-shim'
-		Type=Application
-	'';
 	zramSwap.enable = true;
 	services.openssh.hostKeys = [
 		{

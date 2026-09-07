@@ -15,6 +15,7 @@
         ./arr.nix
         ./jellyfin.nix
         ./home-assistant.nix
+		./pihole.nix
 		./hardware-configuration.nix
 	];
 	boot.loader.grub = {

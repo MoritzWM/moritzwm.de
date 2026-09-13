@@ -4,8 +4,8 @@
     services.pihole-ftl = {
         enable = true;
         openFirewallDNS = true;
-        settings = {
-            dns.upstreams = [
+        settings.dns = {
+            upstreams = [
                 # Quad 9
                 "9.9.9.9"
                 "149.112.112.112"
@@ -17,6 +17,7 @@
                 "2606:4700:4700::1111"
                 "2606:4700:4700::1001"
             ];
+            revServers = [ "true,192.168.178.0/24,192.168.178.1,fritz.box" ];
         };
     };
     services.pihole-web = {

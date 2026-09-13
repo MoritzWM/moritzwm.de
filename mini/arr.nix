@@ -14,11 +14,6 @@
         enable = true;
         openFirewall = true;
     };
-    services.readarr = {
-        enable = true;
-        openFirewall = true;
-        group = "media";
-    };
 
     networking.firewall.allowedTCPPorts = [ 8085 ];
     services.sabnzbd = {

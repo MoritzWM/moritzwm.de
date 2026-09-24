@@ -76,7 +76,8 @@ in
 
   # Local storage for the Postgres data directory.
   systemd.tmpfiles.rules = [
-    "d ${dbDataLocation} 0700 root root - -"
+    "d ${dbDataLocation} 0700 999 999 - -"
+    "Z ${dbDataLocation} - 999 999 - -"
   ];
 
   # The media lives on the CIFS Storage Box; don't start the server until it's mounted.

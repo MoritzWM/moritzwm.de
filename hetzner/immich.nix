@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 let
   # Pin the Immich release. Bump this to upgrade (see https://github.com/immich-app/immich/releases).
-  immichVersion = "v3.0.1";
+  immichVersion = "v3.2.2";
 
   # PostgreSQL image. We use the PG17 VectorChord variant (NOT the guide's default PG14
   # image) because the previous native NixOS install ran PostgreSQL 17 — this keeps the

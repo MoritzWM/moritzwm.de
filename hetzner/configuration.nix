@@ -58,14 +58,6 @@ in
     externalInterface = "enp1s0";
   };
   system.stateVersion = "25.11";
-  system.autoUpgrade = {
-    enable = true;
-    flake = "/var/lib/nixos-config#hetzner";
-    flags = [ "--print-build-logs"  "--commit-lock-file" ];
-    dates = "04:00";
-    operation = "switch";
-    allowReboot = true;
-  };
   zramSwap.enable = true;
   services.openssh.hostKeys = [
     {

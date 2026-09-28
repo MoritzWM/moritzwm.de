@@ -42,19 +42,9 @@
 		pkgs.tmux
 		pkgs.bottom
 		pkgs.vim
-		pkgs.jellyfin-mpv-shim
-		pkgs.bluez
-		pkgs.pavucontrol
+		pkgs.btrfs-progs
 	];
-	system.stateVersion = "25.11";
-	system.autoUpgrade = {
-    enable = true;
-    flake = "/var/lib/nixos-config#mini";
-    flags = [ "--print-build-logs" ];
-    dates = "05:00";
-    operation = "switch";
-    allowReboot = true;
-  };
+	system.stateVersion = "26.05";
 
 	zramSwap.enable = true;
 	services.openssh.hostKeys = [
@@ -66,14 +56,6 @@
 	sops = {
 		defaultSopsFile = ./secrets.yaml;
 		age.keyFile = "/var/lib/sops-nix/keys.txt";
-	};
-
-	services.nfs.server = {
-		enable = true;
-		exports = ''
-			/export 192.168.178.0/24(rw,fsid=0,insecure,no_root_squash,no_subtree_check,async)
-			/export/Photos 192.168.178.0/24(rw,nohide,insecure,no_root_squash,no_subtree_check,async)
-		'';
 	};
 
 	users.users.root = {
@@ -89,8 +71,8 @@
 		}];
 
 	fileSystems."/hub" = {
-		device = "UUID=b5aa426e-5840-4ccf-a303-250c65e23dd5";
-		fsType = "btrfs";
+		device = "UUID=db6499a0-fb16-47bc-b09c-815ffd7c2dc8";
+	 fsType = "btrfs";
 		options = [
 			"defaults"
 			"auto"
@@ -99,10 +81,19 @@
 		];
 	};
 
-	fileSystems."/export/Photos" = {
-		device = "/hub/Photos";
+	fileSystems."/export/hub" = {
+		device = "/hub";
 		fsType = "none";
 		options = [ "bind" ];
+		depends = [ "/hub" ];
+	};
+
+	services.nfs.server = {
+		enable = true;
+		exports = ''
+		  /export 192.168.178.0/24(rw,fsid=0,insecure,no_root_squash,no_subtree_check,async)
+		  /export/hub 192.168.178.0/24(rw,nohide,insecure,no_root_squash,no_subtree_check,async)
+		'';
 	};
 
 	virtualisation.vmVariant = {

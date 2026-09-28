@@ -19,5 +19,7 @@
     services.sabnzbd = {
         enable = true;
         group = "media";
+        openFirewall = true;
+        settings.allowConfigWrite = true;
     };
 }

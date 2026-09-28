@@ -91,7 +91,7 @@ in
 			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpKJNbeP/AReFpACmNIvfbpukdm2BwpnmOVszlxDVMj moritz@moritz-arch"
 			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILUI69bmgKa3TJC9tCTeB60X3dy4xgl3d5s7Ag3+0wq6 moritz@htpc"
 			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJqrx0JsGPUwEgiJqcXaPc4n7elVfq/mp4A9qIAOiXfg deck@steamdeck"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAhPH7+iLuMsmmjAXBriSLe+0TB/jYjnza9eGFs8E7zJ root@mini"
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBT6sgrPY9DYzKWil6zdVnFhD1AiS78OjaK6xTIt5Hx5 root@mini"
     ];
   };
   services.openssh.settings = {

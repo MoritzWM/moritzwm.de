@@ -67,7 +67,7 @@ in
   ];
   sops = {
     defaultSopsFile = ./secrets.yaml;
-    age.keyFile = "/var/lib/sops-nix/keys.txt";
+    age.keyFile = "/run/secrets.d/age-keys.txt";
     secrets = lib.genAttrs hetznerSecrets (name: {
       owner = "root";
       group = "root";

@@ -51,6 +51,7 @@ in
     pkgs.gitMinimal
     pkgs.tmux
     pkgs.bottom
+    pkgs.borgbackup
   ];
   networking.nat = {
     enable = true;

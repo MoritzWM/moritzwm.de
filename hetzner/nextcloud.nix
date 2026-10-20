@@ -120,7 +120,7 @@ in
       # nextcloud-occ maintenance:mode --off
       services.nextcloud = {
         enable = true;
-        package = pkgs.nextcloud33;
+        package = pkgs.nextcloud35;
         hostName = "cloud.moritzwm.de";
 
         extraAppsEnable = true;
@@ -133,8 +133,6 @@ in
           dbuser = "nextcloud";
           dbhost = "/run/postgresql";
           dbname = "nextcloud";
-          adminuser = "moritz-admin";
-          adminpassFile = config.sops.secrets."nextcloud/admin_pass".path;
         };
 
         settings = {

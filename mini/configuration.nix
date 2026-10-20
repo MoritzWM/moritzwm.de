@@ -43,6 +43,7 @@
 		pkgs.bottom
 		pkgs.vim
 		pkgs.btrfs-progs
+		pkgs.borgbackup
 	];
 	system.stateVersion = "26.05";
 
@@ -62,6 +63,7 @@
 		openssh.authorizedKeys.keys = [
 			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpKJNbeP/AReFpACmNIvfbpukdm2BwpnmOVszlxDVMj moritz@moritz-arch"
 			"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILUI69bmgKa3TJC9tCTeB60X3dy4xgl3d5s7Ag3+0wq6 moritz@htpc"
+			"command='borg serve --restrict-to-path /hub/backup',restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKQIyxt6QKIpXOctAayrGt7h36hMPK9EmFVOqmMbhrBV root@hetzner "
 		];
 	};
 

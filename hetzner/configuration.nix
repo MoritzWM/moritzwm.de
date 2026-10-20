@@ -14,6 +14,8 @@ let
     "hetzner/nextcloud_smb_pass"
     "hetzner/paperless_smb_user"
     "hetzner/paperless_smb_pass"
+    "hetzner/wireguard_private_key"
+    "hetzner/wireguard_preshared_key"
   ];
 in
 {
@@ -36,6 +38,31 @@ in
   };
   networking.hostName = "hetzner";
   networking.domain = "moritzwm.de";
+  networking.interfaces.enp1s0.ipv6.addresses = [{
+    address = "2a01:4f8:c0c:5a19::2";
+    prefixLength = 64;
+  }];
+  networking.defaultGateway6 = {
+    address = "fe80::1";
+    interface = "enp1s0";
+  };
+  networking.wireguard.interfaces.wg-home = {
+    ips = [
+      "192.168.178.201/24"
+      "fd64:ccc0:9a33::201/64"
+    ];
+    privateKeyFile = config.sops.secrets."hetzner/wireguard_private_key".path;
+    peers = [{
+      publicKey = "uUJN3l48VhNWaHw66oZ4nvFCdvuQ2Y6KYcOLDxVLq2w=";
+      presharedKeyFile = config.sops.secrets."hetzner/wireguard_preshared_key".path;
+      allowedIPs = [
+        "192.168.178.0/24"
+        "fd64:ccc0:9a33::/64"
+      ];
+      endpoint = "pec1mvdw2mugnb21.myfritz.net:51102";
+      persistentKeepalive = 25;
+    }];
+  };
   services.openssh.enable = true;
   time.timeZone = "Europe/Berlin";
 

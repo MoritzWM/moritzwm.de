@@ -133,7 +133,7 @@ in
       };
 
       paperless-webserver = {
-        image = "ghcr.io/paperless-ngx/paperless-ngx:2.20.15";
+        image = "ghcr.io/paperless-ngx/paperless-ngx:3.3.3";
         ports = [ "127.0.0.1:28981:8000" ];
         volumes = [
           "paperless-data:/usr/src/paperless/data"
@@ -147,6 +147,7 @@ in
           USERMAP_UID = "999";
           USERMAP_GID = "999";
           PAPERLESS_REDIS = "redis://paperless-broker:6379";
+          PAPERLESS_DBENGINE = "postgresql";
           PAPERLESS_DBHOST = "paperless-db";
           PAPERLESS_DBNAME = "paperless";
           PAPERLESS_DBUSER = "paperless";

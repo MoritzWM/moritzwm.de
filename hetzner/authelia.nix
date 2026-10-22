@@ -184,7 +184,7 @@ in
 
           notifier.smtp = {
             address = "submission://smtp.mailbox.org:587";
-            username = "noreply@moritzwm.de";
+            username = "mail@moritzwm.de";
             password = ''{{ secret "${config.sops.secrets."authelia/smtp_password".path}" }}'';
             sender = "Authelia <noreply@moritzwm.de>";
           };

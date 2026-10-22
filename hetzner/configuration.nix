@@ -31,6 +31,7 @@ in
     ./mealie.nix
     ./paperless.nix
     ./actual.nix
+    ./backup.nix
   ];
   boot.loader.grub = {
     efiSupport = true;

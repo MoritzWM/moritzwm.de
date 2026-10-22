@@ -183,7 +183,7 @@ in
           storage.local.path = "/var/lib/authelia-main/db.sqlite3";
 
           notifier.smtp = {
-            address = "submission://mxe93e.netcup.net:587";
+            address = "submission://smtp.mailbox.org:587";
             username = "noreply@moritzwm.de";
             password = ''{{ secret "${config.sops.secrets."authelia/smtp_password".path}" }}'';
             sender = "Authelia <noreply@moritzwm.de>";

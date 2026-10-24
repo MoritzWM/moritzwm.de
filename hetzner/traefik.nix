@@ -16,7 +16,10 @@
         };
         websecure = {
           address = ":443";
-          http.tls.certResolver = "letsencrypt";
+          http.tls = {
+            certResolver = "letsencrypt";
+            domains = [{ main = "moritzwm.de"; }];
+          };
           transport.respondingTimeouts.readTimeout = "0s";
         };
       };

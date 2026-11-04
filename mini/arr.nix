@@ -15,7 +15,7 @@
         openFirewall = true;
     };
 
-    networking.firewall.allowedTCPPorts = [ 8085 ];
+    networking.firewall.allowedTCPPorts = [ 8080 ];
     services.sabnzbd = {
         enable = true;
         group = "media";

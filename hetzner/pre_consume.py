@@ -9,7 +9,7 @@ Environment variables provided by paperless:
 
 import os
 
-import pikepdf
+import pikepdf  # pyright: ignore[reportMissingImports]
 
 
 def unlock_pdf(file_path):

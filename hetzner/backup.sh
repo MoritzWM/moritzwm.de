@@ -7,56 +7,52 @@ trap 'echo $( date ) Backup interrupted >&2; exit 2' INT TERM
 borg_create() {
     borg create --verbose --list --stats --compression zstd --show-rc $@
 }
+borg_prune() {
+    borg prune \
+        --list \
+        --glob-archives "$1" \
+        --show-rc \
+        --keep-daily    7 \
+        --keep-weekly   4 \
+        --keep-monthly  6
+}
+
+
+backup_paperless() (
+    set -e
+    podman exec paperless-webserver\
+    	document_exporter --delete ../export
+    borg_create\
+    	::'{hostname}-paperless-{now}'\
+    	/var/lib/paperless/export
+     borg_prune '{hostname}-paperless-*'
+)
+
+backup_immich() (
+    set -e
+    borg_create\
+    	::'{hostname}-immich-{now}'\
+    	/mnt/storagebox_immich/{backups,library,profile,upload}
+     borg_prune '{hostname}-immich-*'
+)
 
 info "Starting backup"
 
-# Paperless
-podman exec paperless-webserver\
-	document_exporter --delete ../export
-
-borg_create\
-	::'{hostname}-paperless-{now}'\
-	/var/lib/paperless/export
-
-# Immich
-borg_create\
-	::'{hostname}-immich-{now}'\
-	/mnt/storagebox_immich/{backups,library,profile,upload}
-
-
-
-backup_exit=$?
-
-info "Pruning repository"
-
-borg prune                          \
-    --list                          \
-    --glob-archives '{hostname}-*'  \
-    --show-rc                       \
-    --keep-daily    7               \
-    --keep-weekly   4               \
-    --keep-monthly  6
-
-prune_exit=$?
-
-# actually free repo disk space by compacting segments
-
-info "Compacting repository"
-
+backup_paperless
+paperless_exit=$?
+backup_immich
+immich_exit=$?
 borg compact
-
 compact_exit=$?
 
 # use highest exit code as global exit code
-global_exit=$(( backup_exit > prune_exit ? backup_exit : prune_exit ))
+global_exit=$(( paperless_exit > immich_exit ? paperless_exit : immich_exit ))
 global_exit=$(( compact_exit > global_exit ? compact_exit : global_exit ))
 
 if [ ${global_exit} -eq 0 ]; then
     info "Backup, Prune, and Compact finished successfully"
-elif [ ${global_exit} -eq 1 ]; then
-    info "Backup, Prune, and/or Compact finished with warnings"
 else
-    info "Backup, Prune, and/or Compact finished with errors"
+    info "Script finished with warnings/errors: paperless=${paperless_exit}; immich=${immich_exit}; compact=${compact_exit}"
 fi
 
 exit ${global_exit}

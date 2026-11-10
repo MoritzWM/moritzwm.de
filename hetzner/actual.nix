@@ -54,7 +54,7 @@ in
     backend = "podman";
     containers = {
       actual = {
-        image = "docker.io/actualbudget/actual-server:latest";
+        image = "docker.io/actualbudget/actual-server:v26.11.0";
         autoStart = true;
         ports = [ "127.0.0.1:${toString hostPort}:${toString hostPort}" ];
         volumes = [ "actual-data:/data" ];
@@ -68,4 +68,3 @@ in
     };
   };
 }
-

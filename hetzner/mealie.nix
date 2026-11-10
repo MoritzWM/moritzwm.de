@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 let
   # https://github.com/mealie-recipes/mealie/releases
-  mealieVersion = "v3.20.1";
+  mealieVersion = "v3.30.0";
   hostPort = 9925;
 in
 {

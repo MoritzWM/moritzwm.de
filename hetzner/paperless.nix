@@ -133,7 +133,7 @@ in
       };
 
       paperless-webserver = {
-        image = "ghcr.io/paperless-ngx/paperless-ngx:3.3.4";
+        image = "ghcr.io/paperless-ngx/paperless-ngx:3.4.2";
         ports = [ "127.0.0.1:28981:8000" ];
         volumes = [
           "paperless-data:/usr/src/paperless/data"

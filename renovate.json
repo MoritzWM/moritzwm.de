@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Immich server and machine-learning version",
+      "fileMatch": ["^hetzner/immich\\.nix$"],
+      "matchStrings": [
+        "immichVersion = \"(?<currentValue>[^\"]+)\";"
+      ],
+      "depNameTemplate": "ghcr.io/immich-app/immich-server",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Mealie version",
+      "fileMatch": ["^hetzner/mealie\\.nix$"],
+      "matchStrings": [
+        "mealieVersion = \"(?<currentValue>[^\"]+)\";"
+      ],
+      "depNameTemplate": "ghcr.io/mealie-recipes/mealie",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Actual server image tag",
+      "fileMatch": ["^hetzner/actual\\.nix$"],
+      "matchStrings": [
+        "image = \"docker\\.io/actualbudget/actual-server:(?<currentValue>[^\"]+)\";"
+      ],
+      "depNameTemplate": "docker.io/actualbudget/actual-server",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Paperless-ngx image tag",
+      "fileMatch": ["^hetzner/paperless\\.nix$"],
+      "matchStrings": [
+        "image = \"ghcr\\.io/paperless-ngx/paperless-ngx:(?<currentValue>[^\"]+)\";"
+      ],
+      "depNameTemplate": "ghcr.io/paperless-ngx/paperless-ngx",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
